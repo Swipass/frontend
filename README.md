@@ -1,6 +1,6 @@
-# Izipass Frontend — v0.1
+# Swipass Frontend — v0.1
 
-Next.js 15 + React 19 frontend for the Izipass bridge.
+Next.js 15 + React 19 frontend for the Swipass bridge.
 
 ## Pages
 
