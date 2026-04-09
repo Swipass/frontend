@@ -45,7 +45,7 @@ export function fmtAmount(raw: string, decimals: number, maxDp = 6): string {
     const d = BigInt(10 ** decimals);
     const whole = n / d;
     const frac = n % d;
-    if (frac === 0n) return whole.toLocaleString();
+    if (frac === BigInt(0)) return whole.toLocaleString();   // ← changed from 0n
     const fracStr = frac.toString().padStart(decimals, "0").slice(0, maxDp).replace(/0+$/, "");
     return fracStr ? `${whole.toLocaleString()}.${fracStr}` : whole.toLocaleString();
   } catch {
