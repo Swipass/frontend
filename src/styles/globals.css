@@ -1,0 +1,136 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Design tokens ──────────────────────────────────────────── */
+:root {
+  --bg: #f9f8f6;
+  --surface: #ffffff;
+  --surface-2: #f2f1ef;
+  --surface-3: #eae9e6;
+  --border: #e0ddd8;
+  --border-strong: #c4c0ba;
+  --ink-0: #0d0d0b;
+  --ink-1: #1c1c19;
+  --ink-2: #3a3a35;
+  --ink-3: #6b6b63;
+  --ink-4: #9c9c92;
+  --ink-5: #c4c0ba;
+  --glow: rgba(13,13,11,0.06);
+}
+
+.dark {
+  --bg: #0d0d0b;
+  --surface: #141412;
+  --surface-2: #1c1c19;
+  --surface-3: #242421;
+  --border: #2a2a26;
+  --border-strong: #3f3f38;
+  --ink-0: #f9f8f6;
+  --ink-1: #e8e6e1;
+  --ink-2: #c4c0ba;
+  --ink-3: #8c8880;
+  --ink-4: #5a5751;
+  --ink-5: #3a3a35;
+  --glow: rgba(249,248,246,0.04);
+}
+
+/* ── Base ───────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-dm-sans, "DM Sans"), system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--ink-1);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  transition: background 0.3s, color 0.3s;
+}
+input, select, button { font-family: inherit; }
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+/* ── Scrollbar ──────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+
+/* ── Reveal animation ───────────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.65s ease, transform 0.65s ease;
+}
+.reveal.in { opacity: 1; transform: translateY(0); }
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.45s; }
+
+/* ── Glass card ─────────────────────────────────────────────── */
+.glass {
+  background: rgba(255,255,255,0.55);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,0.7);
+}
+.dark .glass {
+  background: rgba(20,20,18,0.72);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
+/* ── 3D card lift ────────────────────────────────────────────── */
+.card-3d {
+  transform: perspective(1000px) rotateX(0deg) rotateY(0deg);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.card-3d:hover {
+  transform: perspective(1000px) rotateX(-2deg) rotateY(1deg) translateY(-4px);
+  box-shadow: 0 24px 64px var(--glow), 0 4px 16px var(--glow);
+}
+
+/* ── Gradient orb ───────────────────────────────────────────── */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+/* ── Input focus ring ───────────────────────────────────────── */
+.iz-input:focus {
+  outline: none;
+  border-color: var(--border-strong);
+  box-shadow: 0 0 0 3px var(--glow);
+}
+
+/* ── Ticker ─────────────────────────────────────────────────── */
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.ticker-track { animation: ticker 35s linear infinite; }
+
+/* ── Shimmer skeleton ───────────────────────────────────────── */
+.shimmer {
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 50%, var(--surface-2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.8s linear infinite;
+}
+
+/* ── Bridge chain arrow pulse ───────────────────────────────── */
+@keyframes arrowPulse {
+  0%,100% { opacity: 0.5; }
+  50%      { opacity: 1; }
+}
+.arrow-pulse { animation: arrowPulse 1.5s ease-in-out infinite; }
+
+/* ── Token logo placeholder ─────────────────────────────────── */
+.token-logo-fallback {
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-dm-mono);
+  font-weight: 700;
+  font-size: 0.7rem;
+}
