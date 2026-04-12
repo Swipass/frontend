@@ -21,7 +21,7 @@ export function NumbersSection() {
 
   return (
     <section id="numbers">
-      <div className="numbers-grid">
+      <div className="numbers-grid" style={{ gap: "16px" }}>
         <div className="num-card reveal" style={{ transitionDelay: "0.05s" }}>
           <div className="num-big">
             0.2<sup>%</sup>
