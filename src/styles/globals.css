@@ -783,3 +783,13 @@ footer{
     display: flex !important;
   }
 }
+
+/* Fix hero bottom stats overlap on mobile */
+@media (max-width: 640px) {
+  .hero-bottom {
+    bottom: 20px !important;
+  }
+  .hero-content {
+    margin-bottom: 100px;
+  }
+}

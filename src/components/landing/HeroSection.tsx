@@ -74,7 +74,7 @@ export function HeroSection() {
       <ThreeHeroCanvas />
       <div className="hero-content">
         <div className="hero-eyebrow">
-          <span className="live-dot"></span> v0.1 live · 3+ chains · non-custodial
+          <span className="live-dot"></span> v0.1 live · non-custodial
         </div>
         <h1 className="hero-h">
           Move value<br />
