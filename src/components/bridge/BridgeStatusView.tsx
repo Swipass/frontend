@@ -26,11 +26,11 @@ interface Execution {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; icon: React.ReactNode; color: string; bg: string }> = {
-  PENDING:  { label: "Preparing",   icon: <Clock className="w-10 h-10" />,        color: "var(--ink-3)",  bg: "var(--surface-2)" },
+  PENDING:  { label: "Preparing",   icon: <Clock className="w-10 h-10" />,        color: "var(--g500)",  bg: "var(--g800)" },
   BRIDGING: { label: "Bridging…",   icon: <Loader2 className="w-10 h-10 animate-spin" />, color: "#d4a017", bg: "#d4a01710" },
   SUCCESS:  { label: "Delivered ✓", icon: <CheckCircle2 className="w-10 h-10" />, color: "#22c55e",      bg: "#22c55e12" },
   FAILED:   { label: "Failed",      icon: <XCircle className="w-10 h-10" />,      color: "#e74c3c",      bg: "#e74c3c10" },
-  REFUNDED: { label: "Refunded",    icon: <CheckCircle2 className="w-10 h-10" />, color: "var(--ink-3)", bg: "var(--surface-2)" },
+  REFUNDED: { label: "Refunded",    icon: <CheckCircle2 className="w-10 h-10" />, color: "var(--g500)", bg: "var(--g800)" },
 };
 
 const PROGRESS_STEPS = ["PENDING","BRIDGING","SUCCESS"];
@@ -43,8 +43,8 @@ function StepDot({ step, current }: { step: string; current: string }) {
   return (
     <div className="flex flex-col items-center gap-1.5">
       <div className="w-3 h-3 rounded-full transition-all duration-500"
-        style={{ background: done || active ? "var(--ink-0)" : "var(--border)", opacity: active ? 1 : done ? 0.5 : 0.25 }} />
-      <span className="font-mono text-[0.58rem] tracking-wider capitalize" style={{ color: active ? "var(--ink-1)" : "var(--ink-4)" }}>
+        style={{ background: done || active ? "var(--g50)" : "var(--g700)", opacity: active ? 1 : done ? 0.5 : 0.25 }} />
+      <span className="font-mono text-[0.58rem] tracking-wider capitalize" style={{ color: active ? "var(--g200)" : "var(--g600)" }}>
         {step.toLowerCase()}
       </span>
     </div>
@@ -87,8 +87,8 @@ export function BridgeStatusView({ executionId }: { executionId: string }) {
   if (loading) {
     return (
       <div className="flex flex-col items-center gap-4">
-        <Loader2 className="w-8 h-8 animate-spin" style={{ color: "var(--ink-3)" }} />
-        <p className="font-mono text-sm" style={{ color: "var(--ink-4)" }}>Loading transfer…</p>
+        <Loader2 className="w-8 h-8 animate-spin" style={{ color: "var(--g500)" }} />
+        <p className="font-mono text-sm" style={{ color: "var(--g600)" }}>Loading transfer…</p>
       </div>
     );
   }
@@ -97,9 +97,9 @@ export function BridgeStatusView({ executionId }: { executionId: string }) {
   if (notFound || !exec) {
     return (
       <div className="text-center space-y-4">
-        <XCircle className="w-12 h-12 mx-auto" style={{ color: "var(--ink-4)" }} />
-        <p className="font-display font-bold text-xl" style={{ color: "var(--ink-0)" }}>Transfer not found</p>
-        <Link href="/bridge" className="font-mono text-sm flex items-center justify-center gap-1.5" style={{ color: "var(--ink-3)", textDecoration: "none" }}>
+        <XCircle className="w-12 h-12 mx-auto" style={{ color: "var(--g600)" }} />
+        <p className="font-display font-bold text-xl" style={{ color: "var(--g50)" }}>Transfer not found</p>
+        <Link href="/bridge" className="font-mono text-sm flex items-center justify-center gap-1.5" style={{ color: "var(--g500)", textDecoration: "none" }}>
           <ArrowLeft className="w-3.5 h-3.5" />Back to bridge
         </Link>
       </div>
@@ -116,27 +116,27 @@ export function BridgeStatusView({ executionId }: { executionId: string }) {
 
       {/* Back link */}
       <Link href="/bridge" className="flex items-center gap-1.5 font-mono text-[0.68rem] transition-colors"
-        style={{ color: "var(--ink-4)", textDecoration: "none" }}>
+        style={{ color: "var(--g500)", textDecoration: "none" }}>
         <ArrowLeft className="w-3.5 h-3.5" />New transfer
       </Link>
 
       {/* Main status card */}
-      <div className="rounded-2xl overflow-hidden" style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 4px 32px var(--glow)" }}>
+      <div className="rounded-2xl overflow-hidden" style={{ background: "var(--g800)", border: "1px solid var(--g700)", boxShadow: "0 4px 32px rgba(0,0,0,0.5)" }}>
 
         {/* Status hero */}
-        <div className="p-8 text-center flex flex-col items-center gap-3" style={{ borderBottom: "1px solid var(--border)", background: cfg.bg }}>
+        <div className="p-8 text-center flex flex-col items-center gap-3" style={{ borderBottom: "1px solid var(--g700)", background: cfg.bg }}>
           <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} style={{ color: cfg.color }}>
             {cfg.icon}
           </motion.div>
           <div className="font-display font-black text-2xl" style={{ color: cfg.color, letterSpacing: "-0.03em" }}>{cfg.label}</div>
           {isLive && (
-            <p className="font-mono text-[0.65rem] flex items-center gap-1.5" style={{ color: "var(--ink-4)" }}>
+            <p className="font-mono text-[0.65rem] flex items-center gap-1.5" style={{ color: "var(--g600)" }}>
               <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse-dot" />
               Refreshing every 5 seconds…
             </p>
           )}
           {isSuccess && exec.durationMs && (
-            <p className="font-mono text-[0.65rem]" style={{ color: "var(--ink-4)" }}>
+            <p className="font-mono text-[0.65rem]" style={{ color: "var(--g600)" }}>
               Completed in {(exec.durationMs / 1000).toFixed(1)}s
             </p>
           )}
@@ -144,11 +144,11 @@ export function BridgeStatusView({ executionId }: { executionId: string }) {
 
         {/* Progress bar */}
         {!isFailed && (
-          <div className="px-8 py-4 flex items-center justify-between" style={{ borderBottom: "1px solid var(--border)" }}>
+          <div className="px-8 py-4 flex items-center justify-between" style={{ borderBottom: "1px solid var(--g700)" }}>
             <StepDot step="PENDING" current={exec.status} />
-            <div className="flex-1 h-px mx-3" style={{ background: "var(--border)" }} />
+            <div className="flex-1 h-px mx-3" style={{ background: "var(--g700)" }} />
             <StepDot step="BRIDGING" current={exec.status} />
-            <div className="flex-1 h-px mx-3" style={{ background: "var(--border)" }} />
+            <div className="flex-1 h-px mx-3" style={{ background: "var(--g700)" }} />
             <StepDot step="SUCCESS" current={exec.status} />
           </div>
         )}
@@ -169,12 +169,12 @@ export function BridgeStatusView({ executionId }: { executionId: string }) {
               : []),
             { label: "Transfer ID", value: shortAddr(exec.id, 10) },
           ].map((row: any, i) => (
-            <div key={i} className="flex items-center justify-between py-3" style={{ borderBottom: "1px solid var(--border)" }}>
-              <span className="font-mono text-[0.62rem] tracking-wider uppercase" style={{ color: "var(--ink-4)" }}>{row.label}</span>
+            <div key={i} className="flex items-center justify-between py-3" style={{ borderBottom: "1px solid var(--g700)" }}>
+              <span className="font-mono text-[0.62rem] tracking-wider uppercase" style={{ color: "var(--g600)" }}>{row.label}</span>
               <div className="flex items-center gap-2">
-                <span className="font-mono text-[0.72rem]" style={{ color: row.error ? "#e74c3c" : "var(--ink-2)" }}>{row.value}</span>
+                <span className="font-mono text-[0.72rem]" style={{ color: row.error ? "#e74c3c" : "var(--g400)" }}>{row.value}</span>
                 {row.copyable && (
-                  <button onClick={() => copy(row.copyable)} className="transition-colors" style={{ color: "var(--ink-5)" }}>
+                  <button onClick={() => copy(row.copyable)} className="transition-colors" style={{ color: "var(--g600)" }}>
                     <Copy className="w-3 h-3" />
                   </button>
                 )}
@@ -187,13 +187,13 @@ export function BridgeStatusView({ executionId }: { executionId: string }) {
         <div className="p-5 pt-3 flex gap-3">
           <Link href="/bridge"
             className="flex-1 py-3 rounded-xl font-display font-bold text-xs tracking-widest uppercase text-center transition-all"
-            style={{ background: "var(--ink-0)", color: "var(--bg)", textDecoration: "none" }}>
+            style={{ background: "var(--g50)", color: "var(--g900)", textDecoration: "none" }}>
             New transfer
           </Link>
           {exec.txHash && (
             <a href={`https://etherscan.io/tx/${exec.txHash}`} target="_blank" rel="noreferrer"
               className="px-4 py-3 rounded-xl flex items-center gap-1.5 font-mono text-xs transition-all"
-              style={{ border: "1px solid var(--border)", color: "var(--ink-3)", textDecoration: "none" }}>
+              style={{ border: "1px solid var(--g700)", color: "var(--g500)", textDecoration: "none" }}>
               Explorer <ExternalLink className="w-3.5 h-3.5" />
             </a>
           )}

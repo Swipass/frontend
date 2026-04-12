@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
 import { useAdmin } from "@/app/providers";
 import { api } from "@/lib/api";
 import {
@@ -18,7 +17,6 @@ const NAV = [
   { id: "bridges",       label: "Bridges",         href: "/admin/bridges",      icon: Shield },
 ];
 
-/* ── Login form ─────────────────────────────────────────────── */
 function AdminLogin() {
   const { login } = useAdmin();
   const [email, setEmail] = useState("");
@@ -42,62 +40,44 @@ function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4"
-      style={{ background: "var(--surface-2)" }}>
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "var(--g900)" }}>
       <div className="w-full max-w-sm">
-        {/* Logo */}
         <div className="flex items-center gap-2 mb-8">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-            style={{ background: "var(--ink-0)" }}>
-            <Zap className="w-4 h-4" style={{ color: "var(--bg)" }} />
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "var(--g50)" }}>
+            <Zap className="w-4 h-4" style={{ color: "var(--g900)" }} />
           </div>
-          <span className="font-display font-black text-lg" style={{ color: "var(--ink-0)", letterSpacing: "-0.035em" }}>
-            izipass <span className="font-mono text-xs font-normal opacity-40">admin</span>
+          <span className="font-display font-black text-lg" style={{ color: "var(--g50)", letterSpacing: "-0.035em" }}>
+            Swipass <span className="font-mono text-xs font-normal opacity-40">admin</span>
           </span>
         </div>
 
-        <div className="rounded-2xl overflow-hidden"
-          style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 4px 32px var(--glow)" }}>
-          <div className="px-6 py-5" style={{ borderBottom: "1px solid var(--border)" }}>
-            <h1 className="font-display font-black text-xl" style={{ color: "var(--ink-0)", letterSpacing: "-0.03em" }}>
-              Admin sign in
-            </h1>
-            <p className="font-mono text-[0.65rem] mt-1" style={{ color: "var(--ink-4)" }}>
-              Access the control panel
-            </p>
+        <div className="rounded-2xl overflow-hidden" style={{ background: "var(--g800)", border: "1px solid var(--g700)", boxShadow: "0 4px 32px rgba(0,0,0,0.5)" }}>
+          <div className="px-6 py-5" style={{ borderBottom: "1px solid var(--g700)" }}>
+            <h1 className="font-display font-black text-xl" style={{ color: "var(--g50)", letterSpacing: "-0.03em" }}>Admin sign in</h1>
+            <p className="font-mono text-[0.65rem] mt-1" style={{ color: "var(--g500)" }}>Access the control panel</p>
           </div>
           <form onSubmit={submit} className="p-6 space-y-4">
             <div>
-              <label className="font-mono text-[0.6rem] tracking-widest uppercase block mb-1.5"
-                style={{ color: "var(--ink-4)" }}>Email</label>
-              <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-                placeholder="admin@izipass.dev" required
+              <label className="font-mono text-[0.6rem] tracking-widest uppercase block mb-1.5" style={{ color: "var(--g500)" }}>Email</label>
+              <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="admin@swipass.com" required
                 className="w-full px-4 py-3 rounded-xl font-sans text-sm iz-input"
-                style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--ink-0)", outline: "none" }} />
+                style={{ background: "var(--g900)", border: "1px solid var(--g700)", color: "var(--g50)", outline: "none" }} />
             </div>
             <div>
-              <label className="font-mono text-[0.6rem] tracking-widest uppercase block mb-1.5"
-                style={{ color: "var(--ink-4)" }}>Password</label>
+              <label className="font-mono text-[0.6rem] tracking-widest uppercase block mb-1.5" style={{ color: "var(--g500)" }}>Password</label>
               <div className="relative">
-                <input type={showPw ? "text" : "password"} value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  placeholder="••••••••" required
+                <input type={showPw ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required
                   className="w-full px-4 py-3 pr-11 rounded-xl font-sans text-sm iz-input"
-                  style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--ink-0)", outline: "none" }} />
+                  style={{ background: "var(--g900)", border: "1px solid var(--g700)", color: "var(--g50)", outline: "none" }} />
                 <button type="button" onClick={() => setShowPw(!showPw)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2"
-                  style={{ color: "var(--ink-4)", background: "none", border: "none", cursor: "pointer" }}>
+                  className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: "var(--g500)", background: "none", border: "none", cursor: "pointer" }}>
                   {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
             <button type="submit" disabled={loading}
               className="w-full py-3.5 rounded-xl font-display font-black text-sm tracking-widest uppercase transition-all mt-2"
-              style={{
-                background: loading ? "var(--surface-3)" : "var(--ink-0)",
-                color: loading ? "var(--ink-4)" : "var(--bg)",
-                cursor: loading ? "not-allowed" : "pointer",
-              }}>
+              style={{ background: loading ? "var(--g700)" : "var(--g50)", color: loading ? "var(--g500)" : "var(--g900)", cursor: loading ? "not-allowed" : "pointer" }}>
               {loading ? "Signing in…" : "Sign in →"}
             </button>
           </form>
@@ -107,70 +87,62 @@ function AdminLogin() {
   );
 }
 
-/* ── Shell layout ───────────────────────────────────────────── */
 export function AdminShell({ children, active }: { children: React.ReactNode; active: string }) {
   const { token, logout } = useAdmin();
 
   if (!token) return <AdminLogin />;
 
   return (
-    <div className="flex min-h-screen" style={{ background: "var(--surface-2)" }}>
-      {/* Sidebar */}
-      <aside className="fixed top-0 left-0 h-full w-52 flex flex-col z-40"
-        style={{ background: "var(--surface)", borderRight: "1px solid var(--border)" }}>
-
-        {/* Logo */}
-        <div className="flex items-center gap-2.5 px-5 h-16" style={{ borderBottom: "1px solid var(--border)" }}>
-          <div className="w-6 h-6 rounded-md flex items-center justify-center"
-            style={{ background: "var(--ink-0)" }}>
-            <Zap className="w-3.5 h-3.5" style={{ color: "var(--bg)" }} />
+    <div className="min-h-screen" style={{ background: "var(--g900)" }}>
+      <aside className="fixed inset-y-0 left-0 w-52 flex flex-col z-40" style={{ background: "var(--g800)", borderRight: "1px solid var(--g700)" }}>
+        
+        {/* Logo - fixed height, left-aligned content */}
+        <div className="flex items-center gap-2.5 px-5 h-16 shrink-0" style={{ borderBottom: "1px solid var(--g700)" }}>
+          <div className="w-6 h-6 rounded-md flex items-center justify-center" style={{ background: "var(--g50)" }}>
+            <Zap className="w-3.5 h-3.5" style={{ color: "var(--g900)" }} />
           </div>
-          <span className="font-display font-black text-sm" style={{ color: "var(--ink-0)", letterSpacing: "-0.03em" }}>
-            izipass
-          </span>
-          <span className="font-mono text-[0.58rem] ml-auto" style={{ color: "var(--ink-5)" }}>admin</span>
+          <span className="font-display font-black text-sm" style={{ color: "var(--g50)", letterSpacing: "-0.03em" }}>Swipass</span>
+          <span className="font-mono text-[0.58rem] ml-auto" style={{ color: "var(--g600)" }}>admin</span>
         </div>
 
-        {/* Nav */}
-        <nav className="flex-1 py-4 overflow-y-auto">
+        {/* Navigation - vertical, left-aligned links */}
+        <nav className="flex-1 py-4 overflow-y-auto flex flex-col">
           {NAV.map(({ id, label, href, icon: Icon }) => {
             const isActive = active === id;
             return (
               <Link key={id} href={href}
-                className="flex items-center gap-3 px-4 py-2.5 mx-2 rounded-lg mb-0.5 transition-all text-sm"
+                className="flex items-center gap-3 py-2.5 transition-all text-sm w-full"
                 style={{
-                  background: isActive ? "var(--surface-2)" : "transparent",
-                  color: isActive ? "var(--ink-0)" : "var(--ink-3)",
+                  background: isActive ? "var(--g900)" : "transparent",
+                  color: isActive ? "var(--g50)" : "var(--g500)",
                   textDecoration: "none",
-                  borderLeft: isActive ? `3px solid var(--ink-0)` : "3px solid transparent",
-                  paddingLeft: isActive ? "13px" : "16px",
+                  borderLeft: isActive ? `3px solid var(--g50)` : "3px solid transparent",
+                  paddingLeft: isActive ? "17px" : "20px",
+                  paddingRight: "20px",
                   fontWeight: isActive ? 600 : 400,
+                  justifyContent: "flex-start",
                 }}>
                 <Icon className="w-4 h-4 shrink-0" />
-                <span className="font-sans">{label}</span>
+                <span className="font-sans text-left">{label}</span>
               </Link>
             );
           })}
         </nav>
 
-        {/* Footer */}
-        <div className="px-4 py-4" style={{ borderTop: "1px solid var(--border)" }}>
-          <Link href="/bridge"
-            className="flex items-center gap-2 text-xs font-mono mb-3 transition-colors"
-            style={{ color: "var(--ink-4)", textDecoration: "none" }}>
+        {/* Footer links - left-aligned */}
+        <div className="px-5 py-4 shrink-0" style={{ borderTop: "1px solid var(--g700)" }}>
+          <Link href="/bridge" className="flex items-center gap-2 text-xs font-mono mb-3 transition-colors w-full"
+            style={{ color: "var(--g500)", textDecoration: "none", justifyContent: "flex-start" }}>
             ← Back to bridge
           </Link>
-          <button onClick={() => { logout(); }}
-            className="flex items-center gap-2 text-xs font-mono w-full transition-colors"
-            style={{ color: "var(--ink-4)", background: "none", border: "none", cursor: "pointer", padding: 0 }}>
-            <LogOut className="w-3.5 h-3.5" />
-            Sign out
+          <button onClick={() => { logout(); }} className="flex items-center gap-2 text-xs font-mono w-full transition-colors"
+            style={{ color: "var(--g500)", background: "none", border: "none", cursor: "pointer", padding: 0, justifyContent: "flex-start" }}>
+            <LogOut className="w-3.5 h-3.5" /> Sign out
           </button>
         </div>
       </aside>
 
-      {/* Main content */}
-      <main className="ml-52 flex-1 p-8 min-h-screen overflow-y-auto">
+      <main className="ml-52 p-8 min-h-screen overflow-y-auto">
         {children}
       </main>
     </div>

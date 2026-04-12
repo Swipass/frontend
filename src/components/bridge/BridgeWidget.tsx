@@ -1,10 +1,4 @@
 "use client";
-/**
- * BridgeWidget — Final Complete & Robust Version
- * - Fixed amount input layout
- * - Automatic & reliable chain switching
- * - Clear, user-friendly error messages
- */
 
 import {
   useState, useEffect, useCallback, useRef,
@@ -32,7 +26,6 @@ interface Quote {
   bridges:string[]; expiresAt:string;
 }
 
-// ── Close-on-outside-click ─────────────────────────────────────
 function useClickOutside(ref: RefObject<HTMLElement|null>, fn: ()=>void) {
   useEffect(()=>{
     const h=(e:MouseEvent)=>{ if(ref.current && !ref.current.contains(e.target as Node)) fn(); };
@@ -41,10 +34,7 @@ function useClickOutside(ref: RefObject<HTMLElement|null>, fn: ()=>void) {
   },[ref,fn]);
 }
 
-// ── Portal dropdown ────────────────────────────────────────────
-function DropdownPortal({
-  anchorRef, onClose, children,
-}:{
+function DropdownPortal({ anchorRef, onClose, children }:{
   anchorRef:RefObject<HTMLElement|null>;
   onClose:()=>void;
   children:React.ReactNode;
@@ -64,7 +54,7 @@ function DropdownPortal({
     <div ref={panelRef} style={{ position:"absolute", top:pos.top, left:pos.left, width:Math.max(pos.width,190), zIndex:9999 }}>
       <motion.div initial={{opacity:0,y:-4}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-4}} transition={{duration:0.12}}
         className="rounded-xl overflow-hidden shadow-2xl"
-        style={{ background:"var(--surface)", border:"1px solid var(--border-strong)", maxHeight:260, overflowY:"auto" }}>
+        style={{ background:"var(--g900)", border:"1px solid var(--g700)", maxHeight:260, overflowY:"auto" }}>
         {children}
       </motion.div>
     </div>,
@@ -72,7 +62,6 @@ function DropdownPortal({
   );
 }
 
-// ── Chain selector ─────────────────────────────────────────────
 function ChainSelector({ value, chains, onChange, id, openId, setOpenId }:{
   value:Chain|null; chains:Chain[]; onChange:(c:Chain)=>void;
   id:string; openId:string|null; setOpenId:(id:string|null)=>void;
@@ -83,12 +72,12 @@ function ChainSelector({ value, chains, onChange, id, openId, setOpenId }:{
     <div className="relative flex-1">
       <button ref={btnRef} onClick={()=>setOpenId(isOpen?null:id)}
         className="w-full flex items-center justify-between p-2.5 rounded-xl transition-all"
-        style={{ background:"var(--surface-2)", border:`1px solid ${isOpen?"var(--border-strong)":"var(--border)"}` }}>
+        style={{ background:"var(--g800)", border:`1px solid ${isOpen?"var(--g600)":"var(--g700)"}` }}>
         <div className="flex items-center gap-2 min-w-0">
           {value ? <SafeImage src={value.logoUrl} alt={value.name} size={22}/> : <div className="w-5 h-5 rounded-full shimmer"/>}
-          <span className="font-medium text-sm truncate" style={{color:"var(--ink-1)"}}>{value?.name??"Select chain"}</span>
+          <span className="font-medium text-sm truncate" style={{color:"var(--g200)"}}>{value?.name??"Select chain"}</span>
         </div>
-        <ChevronDown className="w-3.5 h-3.5 shrink-0 ml-1" style={{color:"var(--ink-4)",transform:isOpen?"rotate(180deg)":"none",transition:"transform 0.15s"}}/>
+        <ChevronDown className="w-3.5 h-3.5 shrink-0 ml-1" style={{color:"var(--g500)",transform:isOpen?"rotate(180deg)":"none",transition:"transform 0.15s"}}/>
       </button>
       <AnimatePresence>
         {isOpen && (
@@ -96,13 +85,13 @@ function ChainSelector({ value, chains, onChange, id, openId, setOpenId }:{
             {chains.map(c=>(
               <button key={c.id}
                 className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left"
-                style={{ background:value?.id===c.id?"var(--surface-2)":"transparent" }}
-                onMouseEnter={e=>(e.currentTarget.style.background="var(--surface-2)")}
-                onMouseLeave={e=>(e.currentTarget.style.background=value?.id===c.id?"var(--surface-2)":"transparent")}
+                style={{ background:value?.id===c.id?"var(--g800)":"transparent" }}
+                onMouseEnter={e=>(e.currentTarget.style.background="var(--g800)")}
+                onMouseLeave={e=>(e.currentTarget.style.background=value?.id===c.id?"var(--g800)":"transparent")}
                 onClick={()=>{ onChange(c); setOpenId(null); }}>
                 <SafeImage src={c.logoUrl} alt={c.name} size={22}/>
-                <span className="text-sm flex-1" style={{color:"var(--ink-1)"}}>{c.name}</span>
-                <span className="font-mono text-[0.58rem]" style={{color:"var(--ink-4)"}}>{c.nativeSymbol}</span>
+                <span className="text-sm flex-1" style={{color:"var(--g200)"}}>{c.name}</span>
+                <span className="font-mono text-[0.58rem]" style={{color:"var(--g600)"}}>{c.nativeSymbol}</span>
               </button>
             ))}
           </DropdownPortal>
@@ -112,7 +101,6 @@ function ChainSelector({ value, chains, onChange, id, openId, setOpenId }:{
   );
 }
 
-// ── Token selector ─────────────────────────────────────────────
 function TokenSelector({ value, tokens, onChange, id, openId, setOpenId }:{
   value:Token|null; tokens:Token[]; onChange:(t:Token)=>void;
   id:string; openId:string|null; setOpenId:(id:string|null)=>void;
@@ -123,10 +111,10 @@ function TokenSelector({ value, tokens, onChange, id, openId, setOpenId }:{
     <div className="relative shrink-0">
       <button ref={btnRef} onClick={()=>setOpenId(isOpen?null:id)}
         className="flex items-center gap-2 px-3 py-2.5 rounded-xl transition-all"
-        style={{ background:"var(--surface-2)", border:`1px solid ${isOpen?"var(--border-strong)":"var(--border)"}` }}>
+        style={{ background:"var(--g800)", border:`1px solid ${isOpen?"var(--g600)":"var(--g700)"}` }}>
         {value ? <SafeImage src={value.logoUrl} alt={value.symbol} size={20}/> : <div className="w-5 h-5 rounded-full shimmer"/>}
-        <span className="font-mono font-semibold text-sm" style={{color:"var(--ink-0)"}}>{value?.symbol??"—"}</span>
-        <ChevronDown className="w-3 h-3" style={{color:"var(--ink-4)",transform:isOpen?"rotate(180deg)":"none",transition:"transform 0.15s"}}/>
+        <span className="font-mono font-semibold text-sm" style={{color:"var(--g50)"}}>{value?.symbol??"—"}</span>
+        <ChevronDown className="w-3 h-3" style={{color:"var(--g500)",transform:isOpen?"rotate(180deg)":"none",transition:"transform 0.15s"}}/>
       </button>
       <AnimatePresence>
         {isOpen && (
@@ -134,14 +122,14 @@ function TokenSelector({ value, tokens, onChange, id, openId, setOpenId }:{
             {tokens.map(t=>(
               <button key={t.symbol}
                 className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left"
-                style={{ background:value?.symbol===t.symbol?"var(--surface-2)":"transparent" }}
-                onMouseEnter={e=>(e.currentTarget.style.background="var(--surface-2)")}
-                onMouseLeave={e=>(e.currentTarget.style.background=value?.symbol===t.symbol?"var(--surface-2)":"transparent")}
+                style={{ background:value?.symbol===t.symbol?"var(--g800)":"transparent" }}
+                onMouseEnter={e=>(e.currentTarget.style.background="var(--g800)")}
+                onMouseLeave={e=>(e.currentTarget.style.background=value?.symbol===t.symbol?"var(--g800)":"transparent")}
                 onClick={()=>{ onChange(t); setOpenId(null); }}>
                 <SafeImage src={t.logoUrl} alt={t.symbol} size={22}/>
                 <div className="flex-1">
-                  <div className="font-mono font-semibold text-sm" style={{color:"var(--ink-0)"}}>{t.symbol}</div>
-                  <div className="font-mono text-[0.58rem]" style={{color:"var(--ink-4)"}}>{t.name}</div>
+                  <div className="font-mono font-semibold text-sm" style={{color:"var(--g50)"}}>{t.symbol}</div>
+                  <div className="font-mono text-[0.58rem]" style={{color:"var(--g600)"}}>{t.name}</div>
                 </div>
               </button>
             ))}
@@ -152,7 +140,6 @@ function TokenSelector({ value, tokens, onChange, id, openId, setOpenId }:{
   );
 }
 
-// ── Chain+Token row (Fixed layout) ─────────────────────────────
 function ChainTokenRow({ 
   label, chain, token, amount, chains, tokens, readOnly,
   onChainChange, onTokenChange, onAmountChange, rowId, openId, setOpenId 
@@ -173,12 +160,10 @@ function ChainTokenRow({
 }) {
   return (
     <div className="rounded-2xl p-4 space-y-3" 
-         style={{background:"var(--surface)", border:"1px solid var(--border)"}}>
-      
-      <div className="font-mono text-[0.58rem] tracking-widest uppercase" style={{color:"var(--ink-4)"}}>
+         style={{background:"var(--g800)", border:"1px solid var(--g700)"}}>
+      <div className="font-mono text-[0.58rem] tracking-widest uppercase" style={{color:"var(--g500)"}}>
         {label}
       </div>
-
       <ChainSelector 
         value={chain} 
         chains={chains} 
@@ -187,7 +172,6 @@ function ChainTokenRow({
         openId={openId} 
         setOpenId={setOpenId}
       />
-
       <div className="flex items-center gap-3">
         <div className="shrink-0">
           <TokenSelector 
@@ -199,11 +183,10 @@ function ChainTokenRow({
             setOpenId={setOpenId}
           />
         </div>
-
         <div className="flex-1 min-w-0">
           {readOnly ? (
             <div className="text-right font-mono font-bold text-xl truncate" 
-                 style={{color: amount ? "var(--ink-0)" : "var(--ink-5)"}}>
+                 style={{color: amount ? "var(--g50)" : "var(--g600)"}}>
               {amount || "—"}
             </div>
           ) : (
@@ -215,11 +198,7 @@ function ChainTokenRow({
               value={amount}
               onChange={e => onAmountChange?.(e.target.value)}
               className="w-full text-right bg-transparent font-mono font-bold text-xl iz-input"
-              style={{ 
-                color: "var(--ink-0)", 
-                border: "none", 
-                outline: "none",
-              }}
+              style={{ color: "var(--g50)", border: "none", outline: "none" }}
             />
           )}
         </div>
@@ -231,13 +210,12 @@ function ChainTokenRow({
 function SummaryRow({label,value,danger}:{label:string;value:string;danger?:boolean}) {
   return (
     <div className="flex justify-between items-center py-1">
-      <span className="font-mono text-[0.64rem]" style={{color:"var(--ink-4)"}}>{label}</span>
-      <span className="font-mono text-[0.68rem]" style={{color:danger?"#e74c3c":"var(--ink-2)"}}>{value}</span>
+      <span className="font-mono text-[0.64rem]" style={{color:"var(--g600)"}}>{label}</span>
+      <span className="font-mono text-[0.68rem]" style={{color:danger?"#e74c3c":"var(--g400)"}}>{value}</span>
     </div>
   );
 }
 
-// ── Main Component ─────────────────────────────────────────────
 export function BridgeWidget() {
   const router = useRouter();
   const { address, isConnected } = useAccount();
@@ -324,38 +302,25 @@ export function BridgeWidget() {
     } finally { setQuoteLoading(false); }
   };
 
-  // ── Robust Execute with Chain Switching ─────────────────────
   const execute = async () => {
     if (!quote || !address) return;
-
     const recipient = useCustomRecipient && recipientAddr ? recipientAddr : address;
     setExecuting(true);
-
     try {
       const r = await api.post("/v1/execute", {
         quoteId: quote.id,
         userAddress: address,
         recipientAddress: recipient,
       });
-
       const { executionId, transactionRequest: txReq } = r.data.data;
       const targetChainId = Number(txReq.chainId);
-
-      // Switch to correct chain
       try {
         await switchChain({ chainId: targetChainId });
-      } catch (switchErr: any) {
-        const chainName = targetChainId === 56 ? "BNB Chain" :
-                         targetChainId === 43114 ? "Avalanche" :
-                         targetChainId === 42161 ? "Arbitrum" :
-                         targetChainId === 10 ? "Optimism" : `Chain ${targetChainId}`;
-        
-        toast.error(`Please switch your wallet to ${chainName} and try again.`);
+      } catch {
+        toast.error(`Please switch your wallet to the correct chain and try again.`);
         setExecuting(false);
         return;
       }
-
-      // Send transaction after successful chain switch
       sendTransaction(
         {
           to: txReq.to as `0x${string}`,
@@ -365,27 +330,14 @@ export function BridgeWidget() {
         },
         {
           onSuccess: async (hash) => {
-            try {
-              await api.post(`/v1/execute/${executionId}/tx-hash`, { txHash: hash });
-            } catch {}
+            try { await api.post(`/v1/execute/${executionId}/tx-hash`, { txHash: hash }); } catch {}
             toast.success("Transaction submitted successfully!");
             router.push(`/bridge/status/${executionId}`);
             setExecuting(false);
           },
           onError: (err: any) => {
-            console.error("Send transaction error:", err);
-            let message = "Transaction failed";
-
-            const msg = (err?.message || "").toLowerCase();
-            if (msg.includes("insufficient") || msg.includes("funds") || msg.includes("gas")) {
-              message = "Insufficient funds for gas. Please add native token to your wallet.";
-            } else if (msg.includes("rejected") || msg.includes("user rejected")) {
-              message = "Transaction was rejected.";
-            } else if (msg.includes("chain")) {
-              message = "Wrong network. Please switch to the correct chain.";
-            }
-
-            toast.error(message);
+            console.error(err);
+            toast.error("Transaction failed. Please try again.");
             setExecuting(false);
           },
         }
@@ -404,16 +356,16 @@ export function BridgeWidget() {
   const recipientOk = !useCustomRecipient || recipientAddr.length > 10;
 
   return (
-    <div className="w-full max-w-[460px] relative">
+    <div className="w-full max-w-[460px] mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="font-display font-black text-2xl" style={{color:"var(--ink-0)",letterSpacing:"-0.035em"}}>Bridge</h1>
-          <p className="font-mono text-[0.58rem] tracking-widest uppercase mt-0.5" style={{color:"var(--ink-4)"}}>Aggregator of aggregators · Non-custodial</p>
+          <h1 className="font-display font-black text-2xl" style={{color:"var(--g50)",letterSpacing:"-0.035em"}}>Bridge</h1>
+          <p className="font-mono text-[0.58rem] tracking-widest uppercase mt-0.5" style={{color:"var(--g600)"}}>Aggregator of aggregators · Non-custodial</p>
         </div>
         <button onClick={()=>setShowSettings(!showSettings)}
           className="w-9 h-9 flex items-center justify-center rounded-xl transition-all"
-          style={{background:showSettings?"var(--surface-3)":"var(--surface)",border:"1px solid var(--border)",color:"var(--ink-3)"}}>
+          style={{background:showSettings?"var(--g800)":"var(--g800)",border:"1px solid var(--g700)",color:"var(--g500)"}}>
           {showSettings ? <X className="w-4 h-4"/> : <Settings className="w-4 h-4"/>}
         </button>
       </div>
@@ -422,31 +374,32 @@ export function BridgeWidget() {
       <AnimatePresence>
         {showSettings && (
           <motion.div initial={{opacity:0,height:0}} animate={{opacity:1,height:"auto"}} exit={{opacity:0,height:0}}
-            className="rounded-2xl overflow-hidden mb-3" style={{background:"var(--surface)",border:"1px solid var(--border)"}}>
+            className="rounded-2xl overflow-hidden mb-3" style={{background:"var(--g800)",border:"1px solid var(--g700)"}}>
             <div className="p-4">
-              <div className="font-mono text-[0.6rem] tracking-widest uppercase mb-3" style={{color:"var(--ink-4)"}}>Slippage tolerance</div>
+              <div className="font-mono text-[0.6rem] tracking-widest uppercase mb-3" style={{color:"var(--g600)"}}>Slippage tolerance</div>
               <div className="flex gap-2">
                 {["0.1","0.5","1.0"].map(v=>(
                   <button key={v} onClick={()=>setSlippage(v)} className="px-3 py-1.5 rounded-lg font-mono text-xs transition-all"
-                    style={{background:slippage===v?"var(--ink-0)":"var(--surface-2)",color:slippage===v?"var(--bg)":"var(--ink-3)",border:"1px solid var(--border)"}}>
+                    style={{background:slippage===v?"var(--g50)":"var(--g900)",color:slippage===v?"var(--g900)":"var(--g500)",border:"1px solid var(--g700)"}}>
                     {v}%
                   </button>
                 ))}
                 <input type="number" placeholder="Custom %" value={slippage} onChange={e=>setSlippage(e.target.value)}
                   className="flex-1 px-3 py-1.5 rounded-lg font-mono text-xs iz-input"
-                  style={{background:"var(--surface-2)",border:"1px solid var(--border)",color:"var(--ink-0)",outline:"none"}}/>
+                  style={{background:"var(--g900)",border:"1px solid var(--g700)",color:"var(--g50)",outline:"none"}}/>
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <div className="rounded-2xl" style={{background:"var(--surface)",border:"1px solid var(--border)",boxShadow:"0 4px 32px var(--glow)"}}>
-        <div className="flex items-center gap-2 px-4 py-3 rounded-t-2xl" style={{borderBottom:"1px solid var(--border)",background:"var(--surface-2)"}}>
+      {/* Main Card */}
+      <div className="rounded-2xl" style={{background:"var(--g800)",border:"1px solid var(--g700)",boxShadow:"0 4px 32px rgba(0,0,0,0.5)"}}>
+        <div className="flex items-center gap-2 px-4 py-3 rounded-t-2xl" style={{borderBottom:"1px solid var(--g700)",background:"var(--g900)"}}>
           {["#e74c3c","#e67e22","#27ae60"].map((c,i) => <div key={i} className="w-2.5 h-2.5 rounded-full" style={{background:c}}/>)}
-          <span className="font-mono text-[0.58rem] ml-1.5" style={{color:"var(--ink-4)"}}>app.swipass.com / bridge</span>
+          <span className="font-mono text-[0.58rem] ml-1.5" style={{color:"var(--g600)"}}>app.swipass.com / bridge</span>
           {isConnected && address && (
-            <span className="ml-auto font-mono text-[0.58rem] flex items-center gap-1.5" style={{color:"var(--ink-4)"}}>
+            <span className="ml-auto font-mono text-[0.58rem] flex items-center gap-1.5" style={{color:"var(--g600)"}}>
               <span className="w-1.5 h-1.5 rounded-full bg-green-500"/>
               {shortAddr(address)}
             </span>
@@ -464,7 +417,7 @@ export function BridgeWidget() {
           <div className="flex justify-center -my-0.5">
             <button onClick={swapChains}
               className="w-9 h-9 rounded-xl flex items-center justify-center z-10 relative transition-all hover:scale-110 active:scale-95"
-              style={{background:"var(--surface-2)",border:"2px solid var(--border)",color:"var(--ink-3)"}}>
+              style={{background:"var(--g800)",border:"2px solid var(--g700)",color:"var(--g500)"}}>
               <ArrowDown className="w-4 h-4"/>
             </button>
           </div>
@@ -481,10 +434,10 @@ export function BridgeWidget() {
             <label className="flex items-center gap-2 cursor-pointer w-fit mb-2 select-none"
               onClick={()=>{setUseCustomRecipient(p=>!p);if(useCustomRecipient)setQuote(null);}}>
               <div className="w-4 h-4 rounded flex items-center justify-center shrink-0 transition-all"
-                style={{background:useCustomRecipient?"var(--ink-0)":"transparent",border:`2px solid ${useCustomRecipient?"var(--ink-0)":"var(--border-strong)"}`}}>
-                {useCustomRecipient && <span className="text-[0.52rem] font-bold" style={{color:"var(--bg)"}}>✓</span>}
+                style={{background:useCustomRecipient?"var(--g50)":"transparent",border:`2px solid ${useCustomRecipient?"var(--g50)":"var(--g700)"}`}}>
+                {useCustomRecipient && <span className="text-[0.52rem] font-bold" style={{color:"var(--g900)"}}>✓</span>}
               </div>
-              <span className="font-mono text-[0.64rem]" style={{color:"var(--ink-3)"}}>
+              <span className="font-mono text-[0.64rem]" style={{color:"var(--g500)"}}>
                 Send to a different wallet <span className="opacity-50">(bridge &amp; forward)</span>
               </span>
             </label>
@@ -494,7 +447,7 @@ export function BridgeWidget() {
                   <input type="text" placeholder="0x… recipient wallet address"
                     value={recipientAddr} onChange={e=>{setRecipientAddr(e.target.value);setQuote(null);}}
                     className="w-full px-3.5 py-3 rounded-xl font-mono text-sm iz-input"
-                    style={{background:"var(--surface-2)",border:"1px solid var(--border-strong)",color:"var(--ink-0)",outline:"none"}}/>
+                    style={{background:"var(--g900)",border:"1px solid var(--g700)",color:"var(--g50)",outline:"none"}}/>
                   {recipientAddr && !recipientAddr.match(/^0x[0-9a-fA-F]{40}$/) && (
                     <p className="font-mono text-[0.6rem] mt-1.5 flex items-center gap-1" style={{color:"#e74c3c"}}>
                       <AlertCircle className="w-3 h-3"/>Enter a valid EVM address (0x…)
@@ -509,17 +462,17 @@ export function BridgeWidget() {
           <AnimatePresence>
             {quote && (
               <motion.div initial={{opacity:0,height:0}} animate={{opacity:1,height:"auto"}} exit={{opacity:0,height:0}}>
-                <div className="rounded-xl p-3.5 space-y-1" style={{background:"var(--surface-2)",border:"1px solid var(--border)"}}>
+                <div className="rounded-xl p-3.5 space-y-1" style={{background:"var(--g900)",border:"1px solid var(--g700)"}}>
                   <SummaryRow label="Best route" value={quote.bridges.slice(0,2).join(", ") || "via routing engine"}/>
                   <SummaryRow label="Swipass fee" value={`${(quote.fee.percentage*100).toFixed(2)}%`}/>
                   <SummaryRow label="Destination gas" value="Covered by solver"/>
                   <SummaryRow label="Estimated time" value={`~${quote.estimatedTime}s`}/>
                   <SummaryRow label="Quote expires in" value={`${timeLeft}s`} danger={timeLeft < 8}/>
-                  <div className="flex justify-between items-center pt-1.5" style={{borderTop:"1px solid var(--border)"}}>
-                    <span className="font-mono text-[0.66rem] font-semibold" style={{color:"var(--ink-0)"}}>You receive</span>
+                  <div className="flex justify-between items-center pt-1.5" style={{borderTop:"1px solid var(--g700)"}}>
+                    <span className="font-mono text-[0.66rem] font-semibold" style={{color:"var(--g50)"}}>You receive</span>
                     <div className="flex items-center gap-2">
                       {toToken && <SafeImage src={toToken.logoUrl} alt={toToken.symbol} size={16}/>}
-                      <span className="font-mono text-sm font-bold" style={{color:"var(--ink-0)"}}>{toDisplay} {toToken?.symbol}</span>
+                      <span className="font-mono text-sm font-bold" style={{color:"var(--g50)"}}>{toDisplay} {toToken?.symbol}</span>
                     </div>
                   </div>
                 </div>
@@ -544,7 +497,7 @@ export function BridgeWidget() {
               {({openConnectModal}) => (
                 <button onClick={openConnectModal}
                   className="w-full py-4 rounded-xl font-display font-black text-sm tracking-widest uppercase transition-all hover:opacity-85"
-                  style={{background:"var(--ink-0)",color:"var(--bg)",cursor:"pointer"}}>
+                  style={{background:"var(--g50)",color:"var(--g900)",cursor:"pointer"}}>
                   Connect Wallet
                 </button>
               )}
@@ -553,8 +506,8 @@ export function BridgeWidget() {
             <button onClick={fetchQuote} disabled={!canQuote || quoteLoading || !recipientOk}
               className="w-full py-4 rounded-xl font-display font-black text-sm tracking-widest uppercase transition-all flex items-center justify-center gap-2"
               style={{
-                background: canQuote && !quoteLoading && recipientOk ? "var(--ink-0)" : "var(--surface-3)",
-                color: canQuote && !quoteLoading && recipientOk ? "var(--bg)" : "var(--ink-4)",
+                background: canQuote && !quoteLoading && recipientOk ? "var(--g50)" : "var(--g700)",
+                color: canQuote && !quoteLoading && recipientOk ? "var(--g900)" : "var(--g500)",
                 cursor: canQuote && !quoteLoading ? "pointer" : "not-allowed",
               }}>
               {quoteLoading ? <><Loader2 className="w-4 h-4 animate-spin"/> Finding best route…</> : "Get Quote →"}
@@ -563,8 +516,8 @@ export function BridgeWidget() {
             <button onClick={execute} disabled={executing || timeLeft === 0 || !recipientOk}
               className="w-full py-4 rounded-xl font-display font-black text-sm tracking-widest uppercase transition-all flex items-center justify-center gap-2"
               style={{
-                background: !executing && timeLeft > 0 ? "var(--ink-0)" : "var(--surface-3)",
-                color: !executing && timeLeft > 0 ? "var(--bg)" : "var(--ink-4)",
+                background: !executing && timeLeft > 0 ? "var(--g50)" : "var(--g700)",
+                color: !executing && timeLeft > 0 ? "var(--g900)" : "var(--g500)",
                 cursor: !executing && timeLeft > 0 ? "pointer" : "not-allowed",
               }}>
               {executing ? <><Loader2 className="w-4 h-4 animate-spin"/> Waiting for signature…</>
@@ -573,7 +526,7 @@ export function BridgeWidget() {
             </button>
           )}
 
-          <p className="text-center font-mono text-[0.56rem]" style={{color:"var(--ink-5)"}}>
+          <p className="text-center font-mono text-[0.56rem]" style={{color:"var(--g600)"}}>
             Non-custodial · You sign from your own wallet
             {useCustomRecipient && recipientAddr.match(/^0x[0-9a-fA-F]{40}$/) && ` · Delivering to ${shortAddr(recipientAddr)}`}
           </p>
@@ -583,7 +536,7 @@ export function BridgeWidget() {
       {quote && (
         <button onClick={()=>{setQuote(null);setQuoteError(null);}}
           className="mt-3 w-full text-center font-mono text-[0.64rem] transition-colors"
-          style={{color:"var(--ink-4)",background:"none",border:"none",cursor:"pointer"}}>
+          style={{color:"var(--g600)",background:"none",border:"none",cursor:"pointer"}}>
           ← Get a new quote
         </button>
       )}

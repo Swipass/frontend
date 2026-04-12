@@ -34,9 +34,9 @@ export function AdminTransactions() {
           <button key={s || "all"} onClick={() => { setStatusFilter(s); setPage(1); }}
             className="font-mono text-[0.65rem] px-3 py-1.5 rounded-lg transition-all"
             style={{
-              background: statusFilter === s ? "var(--ink-0)" : "var(--surface)",
-              color: statusFilter === s ? "var(--bg)" : "var(--ink-3)",
-              border: "1px solid var(--border)",
+              background: statusFilter === s ? "var(--g50)" : "var(--g800)",
+              color: statusFilter === s ? "var(--g900)" : "var(--g400)",
+              border: "1px solid var(--g700)",
               cursor: "pointer",
             }}>
             {s || "All"}
@@ -57,11 +57,11 @@ export function AdminTransactions() {
                         ? `${fmtAmount(ex.quote.fromAmount, tokenDecimals(ex.quote.fromToken))} ${ex.quote.fromToken}`
                         : "—";
                       return (
-                        <tr key={ex.id} className="hover:bg-[var(--surface-2)] transition-colors">
+                        <tr key={ex.id} className="hover:bg-[var(--g800)] transition-colors">
                           <TCell><StatusBadge status={ex.status} /></TCell>
                           <TCell mono>
                             {ex.quote?.fromToken}@{ex.quote?.fromChain}
-                            <span style={{ color: "var(--ink-5)" }}> → </span>
+                            <span style={{ color: "var(--g600)" }}> → </span>
                             {ex.quote?.toToken}@{ex.quote?.toChain}
                           </TCell>
                           <TCell mono>{fromAmt}</TCell>
@@ -69,15 +69,15 @@ export function AdminTransactions() {
                           <TCell mono dim>
                             {ex.recipientAddress && ex.recipientAddress !== ex.userAddress
                               ? shortAddr(ex.recipientAddress, 10)
-                              : <span style={{ color: "var(--ink-5)" }}>same</span>}
+                              : <span style={{ color: "var(--g600)" }}>same</span>}
                           </TCell>
                           <TCell mono dim>
                             {ex.txHash
                               ? <a href={`https://etherscan.io/tx/${ex.txHash}`} target="_blank" rel="noreferrer"
-                                  className="hover:underline" style={{ color: "var(--ink-2)" }}>
+                                  className="hover:underline" style={{ color: "var(--g400)" }}>
                                   {shortAddr(ex.txHash, 10)}
                                 </a>
-                              : <span style={{ color: "var(--ink-5)" }}>—</span>}
+                              : <span style={{ color: "var(--g600)" }}>—</span>}
                           </TCell>
                           <TCell mono dim>{new Date(ex.createdAt).toLocaleString()}</TCell>
                         </tr>

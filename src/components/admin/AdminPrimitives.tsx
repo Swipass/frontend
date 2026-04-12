@@ -1,4 +1,4 @@
-/* Shared admin UI primitives — imported by all admin page components */
+/* Shared admin UI primitives — updated for Swipass dark theme */
 
 import { ReactNode } from "react";
 import { Loader2 } from "lucide-react";
@@ -10,11 +10,11 @@ export function PageHeader({ title, subtitle, action }: {
   return (
     <div className="flex items-start justify-between mb-8">
       <div>
-        <h1 className="font-display font-black text-2xl" style={{ color: "var(--ink-0)", letterSpacing: "-0.04em" }}>
+        <h1 className="font-display font-black text-2xl" style={{ color: "var(--g50)", letterSpacing: "-0.04em" }}>
           {title}
         </h1>
         {subtitle && (
-          <p className="font-mono text-[0.65rem] mt-1" style={{ color: "var(--ink-4)" }}>{subtitle}</p>
+          <p className="font-mono text-[0.65rem] mt-1" style={{ color: "var(--g500)" }}>{subtitle}</p>
         )}
       </div>
       {action}
@@ -28,21 +28,21 @@ export function StatCard({ label, value, sub, accent }: {
 }) {
   return (
     <div className="rounded-2xl p-5" style={{
-      background: accent ? "var(--ink-0)" : "var(--surface)",
-      border: `1px solid ${accent ? "transparent" : "var(--border)"}`,
+      background: accent ? "var(--g50)" : "var(--g800)",
+      border: `1px solid ${accent ? "transparent" : "var(--g700)"}`,
     }}>
       <div className="font-mono text-[0.58rem] tracking-widest uppercase mb-2"
-        style={{ color: accent ? "rgba(249,248,246,0.4)" : "var(--ink-4)" }}>
+        style={{ color: accent ? "rgba(13,13,11,0.5)" : "var(--g500)" }}>
         {label}
       </div>
       <div className="font-display font-black text-3xl" style={{
-        color: accent ? "var(--bg)" : "var(--ink-0)",
+        color: accent ? "var(--g900)" : "var(--g50)",
         letterSpacing: "-0.04em",
       }}>
         {value}
       </div>
       {sub && (
-        <div className="font-mono text-[0.62rem] mt-1" style={{ color: accent ? "rgba(249,248,246,0.4)" : "var(--ink-4)" }}>
+        <div className="font-mono text-[0.62rem] mt-1" style={{ color: accent ? "rgba(13,13,11,0.5)" : "var(--g500)" }}>
           {sub}
         </div>
       )}
@@ -55,10 +55,10 @@ export function TableCard({ title, badge, children }: {
   title: string; badge?: string; children: ReactNode;
 }) {
   return (
-    <div className="rounded-2xl overflow-hidden" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
-      <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: "1px solid var(--border)" }}>
-        <span className="font-display font-bold text-sm" style={{ color: "var(--ink-0)" }}>{title}</span>
-        {badge && <span className="font-mono text-[0.6rem] tracking-widest uppercase" style={{ color: "var(--ink-4)" }}>{badge}</span>}
+    <div className="rounded-2xl overflow-hidden" style={{ background: "var(--g800)", border: "1px solid var(--g700)" }}>
+      <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: "1px solid var(--g700)" }}>
+        <span className="font-display font-bold text-sm" style={{ color: "var(--g50)" }}>{title}</span>
+        {badge && <span className="font-mono text-[0.6rem] tracking-widest uppercase" style={{ color: "var(--g500)" }}>{badge}</span>}
       </div>
       {children}
     </div>
@@ -69,10 +69,10 @@ export function TableCard({ title, badge, children }: {
 export function THead({ cols }: { cols: string[] }) {
   return (
     <thead>
-      <tr style={{ background: "var(--surface-2)" }}>
+      <tr style={{ background: "var(--g900)" }}>
         {cols.map(c => (
           <th key={c} className="text-left px-5 py-3 font-mono text-[0.58rem] tracking-widest uppercase"
-            style={{ color: "var(--ink-4)", borderBottom: "1px solid var(--border)", whiteSpace: "nowrap" }}>
+            style={{ color: "var(--g500)", borderBottom: "1px solid var(--g700)", whiteSpace: "nowrap" }}>
             {c}
           </th>
         ))}
@@ -87,10 +87,10 @@ export function TCell({ children, mono, dim, error, style }: {
 }) {
   return (
     <td className="px-5 py-3.5" style={{
-      fontFamily: mono ? "var(--font-dm-mono)" : "var(--font-dm-sans)",
+      fontFamily: mono ? "var(--font-mono)" : "var(--font-sans)",
       fontSize: mono ? "0.75rem" : "0.85rem",
-      color: error ? "#e74c3c" : dim ? "var(--ink-4)" : "var(--ink-2)",
-      borderBottom: "1px solid var(--border)",
+      color: error ? "#e74c3c" : dim ? "var(--g500)" : "var(--g200)",
+      borderBottom: "1px solid var(--g700)",
       ...style,
     }}>
       {children}
@@ -103,8 +103,8 @@ const STATUS_COLORS: Record<string, { fg: string; bg: string }> = {
   SUCCESS:  { fg: "#22c55e", bg: "#22c55e15" },
   FAILED:   { fg: "#e74c3c", bg: "#e74c3c12" },
   BRIDGING: { fg: "#d4a017", bg: "#d4a01712" },
-  PENDING:  { fg: "var(--ink-4)", bg: "var(--surface-2)" },
-  REFUNDED: { fg: "var(--ink-3)", bg: "var(--surface-2)" },
+  PENDING:  { fg: "var(--g500)", bg: "var(--g800)" },
+  REFUNDED: { fg: "var(--g400)", bg: "var(--g800)" },
 };
 
 export function StatusBadge({ status }: { status: string }) {
@@ -123,8 +123,8 @@ export function Pagination({ page, pages, total, onPage }: {
 }) {
   if (pages <= 1) return null;
   return (
-    <div className="flex items-center justify-between px-5 py-3.5" style={{ borderTop: "1px solid var(--border)" }}>
-      <span className="font-mono text-[0.65rem]" style={{ color: "var(--ink-4)" }}>
+    <div className="flex items-center justify-between px-5 py-3.5" style={{ borderTop: "1px solid var(--g700)" }}>
+      <span className="font-mono text-[0.65rem]" style={{ color: "var(--g500)" }}>
         Page {page} of {pages} · {total} total
       </span>
       <div className="flex gap-2">
@@ -140,8 +140,8 @@ function PaginBtn({ label, disabled, onClick }: { label: string; disabled: boole
     <button onClick={onClick} disabled={disabled}
       className="font-mono text-[0.65rem] px-3 py-1.5 rounded-lg transition-all"
       style={{
-        background: "var(--surface-2)", border: "1px solid var(--border)",
-        color: disabled ? "var(--ink-5)" : "var(--ink-2)",
+        background: "var(--g800)", border: "1px solid var(--g700)",
+        color: disabled ? "var(--g600)" : "var(--g400)",
         cursor: disabled ? "not-allowed" : "pointer", opacity: disabled ? 0.5 : 1,
       }}>
       {label}
@@ -153,14 +153,14 @@ function PaginBtn({ label, disabled, onClick }: { label: string; disabled: boole
 export function AdminLoading() {
   return (
     <div className="flex items-center justify-center py-16 gap-3">
-      <Loader2 className="w-5 h-5 animate-spin" style={{ color: "var(--ink-4)" }} />
-      <span className="font-mono text-sm" style={{ color: "var(--ink-4)" }}>Loading…</span>
+      <Loader2 className="w-5 h-5 animate-spin" style={{ color: "var(--g500)" }} />
+      <span className="font-mono text-sm" style={{ color: "var(--g500)" }}>Loading…</span>
     </div>
   );
 }
 
 export function AdminEmpty({ msg = "No data" }: { msg?: string }) {
   return (
-    <div className="py-14 text-center font-mono text-sm" style={{ color: "var(--ink-4)" }}>{msg}</div>
+    <div className="py-14 text-center font-mono text-sm" style={{ color: "var(--g500)" }}>{msg}</div>
   );
 }

@@ -39,23 +39,25 @@ export function AdminOverview() {
       {/* Recent transfers table */}
       <TableCard title="Recent Transfers" badge="Last 10">
         {s.recentExecutions?.length > 0 ? (
-          <table className="w-full border-collapse">
-            <THead cols={["Status", "Route", "From wallet", "Time"]} />
-            <tbody>
-              {s.recentExecutions.map((ex: any) => (
-                <tr key={ex.id} className="hover:bg-[var(--surface-2)] transition-colors">
-                  <TCell><StatusBadge status={ex.status} /></TCell>
-                  <TCell mono>
-                    {ex.quote?.fromToken}@{ex.quote?.fromChain} → {ex.quote?.toToken}@{ex.quote?.toChain}
-                  </TCell>
-                  <TCell mono dim>{shortAddr(ex.userAddress ?? "", 10)}</TCell>
-                  <TCell mono dim>{new Date(ex.createdAt).toLocaleString()}</TCell>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <THead cols={["Status", "Route", "From wallet", "Time"]} />
+              <tbody>
+                {s.recentExecutions.map((ex: any) => (
+                  <tr key={ex.id} className="hover:bg-[var(--g800)] transition-colors">
+                    <TCell><StatusBadge status={ex.status} /></TCell>
+                    <TCell mono>
+                      {ex.quote?.fromToken}@{ex.quote?.fromChain} → {ex.quote?.toToken}@{ex.quote?.toChain}
+                    </TCell>
+                    <TCell mono dim>{shortAddr(ex.userAddress ?? "", 10)}</TCell>
+                    <TCell mono dim>{new Date(ex.createdAt).toLocaleString()}</TCell>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         ) : (
-          <div className="py-12 text-center font-mono text-sm" style={{ color: "var(--ink-4)" }}>
+          <div className="py-12 text-center font-mono text-sm" style={{ color: "var(--g500)" }}>
             No transfers yet — bridge something!
           </div>
         )}
