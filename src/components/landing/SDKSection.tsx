@@ -50,17 +50,17 @@ export function SDKSection() {
             </div>
           </div>
         </div>
-        <div className="reveal-right" style={{ transitionDelay: "0.15s" }}>
-          <div className="code-window">
+        <div className="reveal-right" style={{ transitionDelay: "0.15s", overflowX: "auto", width: "100%" }}>
+          <div className="code-window" style={{ minWidth: "280px" }}>
             <div className="code-toolbar">
               <div className="code-dot"></div>
               <div className="code-dot"></div>
               <div className="code-dot"></div>
               <span className="code-title">swipass-sdk · TypeScript</span>
             </div>
-            <div className="code-body">
-              <pre style={{ margin: 0, overflowX: "auto" }}>
-                <code style={{ fontFamily: "var(--font-mono)", fontSize: "13px", lineHeight: "1.8", whiteSpace: "pre" }}>
+            <div className="code-body" style={{ overflowX: "auto" }}>
+              <pre style={{ margin: 0, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+                <code style={{ fontFamily: "var(--font-mono)", fontSize: "13px", lineHeight: "1.8", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
 {`// install: npm i @swipass/sdk
 import Swipass from '@swipass/sdk';
 

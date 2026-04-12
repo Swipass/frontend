@@ -101,7 +101,7 @@ export function HeroSection() {
           <span className="hero-stat-num" id="h-vol">$0</span>
           <span className="hero-stat-label">routed today</span>
         </div>
-        <div className="hero-stat" style={{ textAlign: "center" }}>
+        <div className="hero-stat">
           <span className="hero-stat-num">3</span>
           <span className="hero-stat-label">chains active</span>
         </div>
@@ -109,11 +109,11 @@ export function HeroSection() {
           <div className="scroll-cue-line"></div>
           <span>scroll</span>
         </div>
-        <div className="hero-stat" style={{ textAlign: "center" }}>
+        <div className="hero-stat">
           <span className="hero-stat-num" id="h-score">97.1%</span>
           <span className="hero-stat-label">bridge reliability</span>
         </div>
-        <div className="hero-stat" style={{ textAlign: "right" }}>
+        <div className="hero-stat">
           <span className="hero-stat-num">0.2%</span>
           <span className="hero-stat-label">avg fee</span>
         </div>
