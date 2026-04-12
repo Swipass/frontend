@@ -74,7 +74,7 @@ export function HeroSection() {
       <ThreeHeroCanvas />
       <div className="hero-content">
         <div className="hero-eyebrow">
-          <span className="live-dot"></span> v0.1 live · 3 chains · non-custodial
+          <span className="live-dot"></span> v0.1 live · 3+ chains · non-custodial
         </div>
         <h1 className="hero-h">
           Move value<br />
@@ -96,16 +96,18 @@ export function HeroSection() {
         </div>
       </div>
       <div className="hero-ticker" id="hero-ticker"></div>
+      
+      {/* Hero bottom stats - responsive grid on mobile, flex on desktop */}
       <div className="hero-bottom">
         <div className="hero-stat">
           <span className="hero-stat-num" id="h-vol">$0</span>
           <span className="hero-stat-label">routed today</span>
         </div>
         <div className="hero-stat">
-          <span className="hero-stat-num">3</span>
+          <span className="hero-stat-num">3+</span>
           <span className="hero-stat-label">chains active</span>
         </div>
-        <div className="scroll-cue">
+        <div className="scroll-cue hidden sm:flex">
           <div className="scroll-cue-line"></div>
           <span>scroll</span>
         </div>
