@@ -9,10 +9,10 @@ import { getDefaultConfig } from "@rainbow-me/rainbowkit";
 import { mainnet, arbitrum, optimism, base, polygon, avalanche, bsc } from "wagmi/chains";
 import "@rainbow-me/rainbowkit/styles.css";
 
-// ── Wagmi config ─────────────────────────────────────────────
+// ── Wagmi config with correct app name and metadata for mobile ──
 const wagmiConfig = getDefaultConfig({
-  appName: "Izipass",
-  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "placeholder_get_from_walletconnect_cloud",
+  appName: "Swipass",
+  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "",
   chains: [mainnet, arbitrum, optimism, base, polygon, avalanche, bsc],
   ssr: true,
 });
@@ -28,7 +28,7 @@ function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setMounted(true);
-    const stored = localStorage.getItem("iz-theme");
+    const stored = localStorage.getItem("swipass-theme");
     const sysDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     const dark = stored ? stored === "dark" : sysDark;
     setIsDark(dark);
@@ -39,7 +39,7 @@ function ThemeProvider({ children }: { children: ReactNode }) {
     const next = !isDark;
     setIsDark(next);
     document.documentElement.classList.toggle("dark", next);
-    localStorage.setItem("iz-theme", next ? "dark" : "light");
+    localStorage.setItem("swipass-theme", next ? "dark" : "light");
   };
 
   if (!mounted) return <>{children}</>;
@@ -55,12 +55,12 @@ function AdminProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
-    const stored = sessionStorage.getItem("iz-admin-token");
+    const stored = sessionStorage.getItem("swipass-admin-token");
     if (stored) setToken(stored);
   }, []);
 
-  const login = (t: string) => { setToken(t); sessionStorage.setItem("iz-admin-token", t); };
-  const logout = () => { setToken(null); sessionStorage.removeItem("iz-admin-token"); };
+  const login = (t: string) => { setToken(t); sessionStorage.setItem("swipass-admin-token", t); };
+  const logout = () => { setToken(null); sessionStorage.removeItem("swipass-admin-token"); };
 
   return <AdminContext.Provider value={{ token, login, logout }}>{children}</AdminContext.Provider>;
 }
@@ -83,15 +83,15 @@ export function Providers({ children }: { children: ReactNode }) {
                 position="bottom-right"
                 toastOptions={{
                   style: {
-                    background: "var(--surface)",
-                    color: "var(--ink-1)",
-                    border: "1px solid var(--border)",
-                    fontFamily: "var(--font-dm-sans)",
+                    background: "var(--g800)",
+                    color: "var(--g50)",
+                    border: "1px solid var(--g700)",
+                    fontFamily: "var(--font-mono)",
                     fontSize: "0.875rem",
                     borderRadius: "8px",
                   },
-                  success: { iconTheme: { primary: "var(--ink-0)", secondary: "var(--bg)" } },
-                  error: { iconTheme: { primary: "#e74c3c", secondary: "#fff" } },
+                  success: { iconTheme: { primary: "#22c55e", secondary: "var(--g900)" } },
+                  error: { iconTheme: { primary: "#e74c3c", secondary: "var(--g900)" } },
                 }}
               />
             </RainbowKitProviderWrapper>
