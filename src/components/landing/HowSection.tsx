@@ -47,7 +47,7 @@ export function HowSection() {
         </h2>
         <p style={{ marginTop: "16px" }}>Three layers of abstraction. Zero custody. One outcome.</p>
       </div>
-      <div className="how-steps">
+      <div className="how-steps" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px" }}>
         {steps.map((step, i) => (
           <div key={step.num} className="how-step reveal" style={{ transitionDelay: `${0.1 * (i + 1)}s` }}>
             <div className="step-num">{step.num}</div>

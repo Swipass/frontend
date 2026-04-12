@@ -51,7 +51,7 @@ export function ArchitectureSection() {
           Four permanent layers. Lower layers never rewrite, only upper layers evolve. This is how Swipass survives multiple market cycles.
         </p>
       </div>
-      <div className="arch-layers">
+      <div className="arch-layers" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
         {layers.map((layer, i) => (
           <div key={layer.idx} className="arch-layer reveal" style={{ transitionDelay: `${0.05 * (i + 1)}s` }}>
             <div className="arch-layer-num">
