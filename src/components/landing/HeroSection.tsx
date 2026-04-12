@@ -6,37 +6,39 @@ import { ThreeHeroCanvas } from "./ThreeHeroCanvas";
 
 export function HeroSection() {
   useEffect(() => {
-    // Hero ticker dynamic content
     const ticker = document.getElementById("hero-ticker");
-    if (ticker) {
-      const chains = ["ETH", "SOL", "ARB", "OP", "BASE", "MATIC", "BSC"];
-      const tokens = ["USDC", "ETH", "USDT", "WBTC", "DAI", "SOL"];
-      const addCard = () => {
-        const from = chains[Math.floor(Math.random() * chains.length)];
-        let to;
-        do {
-          to = chains[Math.floor(Math.random() * chains.length)];
-        } while (to === from);
-        const tok = tokens[Math.floor(Math.random() * tokens.length)];
-        const amt = (Math.random() * 12000 + 200).toFixed(0);
-        const div = document.createElement("div");
-        div.className = "tick-card";
-        div.innerHTML = `
-          <div class="tick-route"><b>${from}</b><span>→</span><b>${to}</b></div>
-          <div class="tick-amt">$${Number(amt).toLocaleString()} ${tok}</div>
-          <div class="tick-st"><div class="tick-st-dot"></div>routing via swipass</div>
-        `;
-        ticker.insertBefore(div, ticker.firstChild);
-        if (ticker.children.length > 4) ticker.removeChild(ticker.lastChild);
-      };
-      addCard();
-      addCard();
-      const interval = setInterval(addCard, 2000 + Math.random() * 1200);
-      return () => clearInterval(interval);
-    }
+    if (!ticker) return;
+
+    const chains = ["ETH", "SOL", "ARB", "OP", "BASE", "MATIC", "BSC"];
+    const tokens = ["USDC", "ETH", "USDT", "WBTC", "DAI", "SOL"];
+    
+    const addCard = () => {
+      const from = chains[Math.floor(Math.random() * chains.length)];
+      let to;
+      do {
+        to = chains[Math.floor(Math.random() * chains.length)];
+      } while (to === from);
+      const tok = tokens[Math.floor(Math.random() * tokens.length)];
+      const amt = (Math.random() * 12000 + 200).toFixed(0);
+      const div = document.createElement("div");
+      div.className = "tick-card";
+      div.innerHTML = `
+        <div class="tick-route"><b>${from}</b><span>→</span><b>${to}</b></div>
+        <div class="tick-amt">$${Number(amt).toLocaleString()} ${tok}</div>
+        <div class="tick-st"><div class="tick-st-dot"></div>routing via swipass</div>
+      `;
+      ticker.insertBefore(div, ticker.firstChild);
+      if (ticker.children.length > 4 && ticker.lastChild) {
+        ticker.removeChild(ticker.lastChild);
+      }
+    };
+    
+    addCard();
+    addCard();
+    const interval = setInterval(addCard, 2000 + Math.random() * 1200);
+    return () => clearInterval(interval);
   }, []);
 
-  // Animated numbers (volume & score)
   useEffect(() => {
     let volDisplay = 247843;
     let scoreDisplay = 97.1;
@@ -81,7 +83,7 @@ export function HeroSection() {
           <span className="dim">In one line.</span>
         </h1>
         <p className="hero-sub">
-          Swipass is a decision layer above every bridge and aggregator. Not another bridge, the engine that picks the best one, every time.
+          Swipass is a decision layer above every bridge and aggregator. Not another bridge — the engine that picks the best one, every time.
         </p>
         <div className="hero-ctas">
           <button className="btn-primary" onClick={showComingSoon}>start building</button>
@@ -96,9 +98,7 @@ export function HeroSection() {
       <div className="hero-ticker" id="hero-ticker"></div>
       <div className="hero-bottom">
         <div className="hero-stat">
-          <span className="hero-stat-num" id="h-vol">
-            $0
-          </span>
+          <span className="hero-stat-num" id="h-vol">$0</span>
           <span className="hero-stat-label">routed today</span>
         </div>
         <div className="hero-stat" style={{ textAlign: "center" }}>
@@ -110,9 +110,7 @@ export function HeroSection() {
           <span>scroll</span>
         </div>
         <div className="hero-stat" style={{ textAlign: "center" }}>
-          <span className="hero-stat-num" id="h-score">
-            97.1%
-          </span>
+          <span className="hero-stat-num" id="h-score">97.1%</span>
           <span className="hero-stat-label">bridge reliability</span>
         </div>
         <div className="hero-stat" style={{ textAlign: "right" }}>
