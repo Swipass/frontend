@@ -240,6 +240,12 @@ export function BridgeWidget() {
   const [showSettings,setShowSettings]=useState(false);
   const [slippage,setSlippage]=useState("0.5");
 
+  // Multi‑step execution state
+  const [executionId, setExecutionId] = useState<string | null>(null);
+  const [currentStepIndex, setCurrentStepIndex] = useState<number>(0);
+  const [waitingForNext, setWaitingForNext] = useState(false);
+  const nextStepInterval = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(()=>{
     api.get("/v1/chains").then(r=>{
       const list:Chain[]=r.data.data;
@@ -302,6 +308,77 @@ export function BridgeWidget() {
     } finally { setQuoteLoading(false); }
   };
 
+  // Start polling for next step after submitting a transaction
+  const startPollingNextStep = (execId: string) => {
+    if (nextStepInterval.current) clearInterval(nextStepInterval.current);
+    nextStepInterval.current = setInterval(async () => {
+      try {
+        const res = await api.get(`/v1/execute/${execId}/next`);
+        const data = res.data.data;
+        if (data.completed) {
+          // All steps done
+          clearInterval(nextStepInterval.current!);
+          setWaitingForNext(false);
+          setExecuting(false);
+          router.push(`/bridge/status/${execId}`);
+        } else if (data.transactionRequest) {
+          // Next step ready – ask user to sign
+          clearInterval(nextStepInterval.current!);
+          setWaitingForNext(false);
+          // Sign the new transaction
+          await signAndSendStep(execId, data.transactionRequest, data.stepIndex);
+        } else if (data.waitingForConfirmation) {
+          // Still waiting for previous tx to confirm – do nothing, keep polling
+        } else if (data.error) {
+          clearInterval(nextStepInterval.current!);
+          setWaitingForNext(false);
+          setExecuting(false);
+          toast.error(data.error);
+        }
+      } catch (err) {
+        console.error("Poll next step error", err);
+      }
+    }, 3000);
+  };
+
+  const signAndSendStep = async (execId: string, txReq: any, stepIdx: number) => {
+    const targetChainId = Number(txReq.chainId);
+    try {
+      await switchChain({ chainId: targetChainId });
+    } catch {
+      toast.error(`Please switch your wallet to chain ID ${targetChainId} and try again.`);
+      setExecuting(false);
+      return;
+    }
+
+    sendTransaction(
+      {
+        to: txReq.to as `0x${string}`,
+        data: txReq.data as `0x${string}`,
+        value: BigInt(txReq.value ?? "0"),
+        chainId: targetChainId,
+      },
+      {
+        onSuccess: async (hash) => {
+          try {
+            await api.post(`/v1/execute/${execId}/submit-step`, { txHash: hash });
+            toast.success(`Step ${stepIdx + 1} submitted!`);
+            setWaitingForNext(true);
+            startPollingNextStep(execId);
+          } catch (err) {
+            toast.error("Failed to record transaction");
+            setExecuting(false);
+          }
+        },
+        onError: (err: any) => {
+          console.error(err);
+          toast.error("Transaction rejected or failed");
+          setExecuting(false);
+        },
+      }
+    );
+  };
+
   const execute = async () => {
     if (!quote || !address) return;
     const recipient = useCustomRecipient && recipientAddr ? recipientAddr : address;
@@ -312,36 +389,10 @@ export function BridgeWidget() {
         userAddress: address,
         recipientAddress: recipient,
       });
-      const { executionId, transactionRequest: txReq } = r.data.data;
-      const targetChainId = Number(txReq.chainId);
-      try {
-        await switchChain({ chainId: targetChainId });
-      } catch {
-        toast.error(`Please switch your wallet to the correct chain and try again.`);
-        setExecuting(false);
-        return;
-      }
-      sendTransaction(
-        {
-          to: txReq.to as `0x${string}`,
-          data: txReq.data as `0x${string}`,
-          value: BigInt(txReq.value ?? "0"),
-          chainId: targetChainId,
-        },
-        {
-          onSuccess: async (hash) => {
-            try { await api.post(`/v1/execute/${executionId}/tx-hash`, { txHash: hash }); } catch {}
-            toast.success("Transaction submitted successfully!");
-            router.push(`/bridge/status/${executionId}`);
-            setExecuting(false);
-          },
-          onError: (err: any) => {
-            console.error(err);
-            toast.error("Transaction failed. Please try again.");
-            setExecuting(false);
-          },
-        }
-      );
+      const { executionId: execId, transactionRequest: firstTx, stepIndex: firstStepIdx } = r.data.data;
+      setExecutionId(execId);
+      setCurrentStepIndex(firstStepIdx);
+      await signAndSendStep(execId, firstTx, firstStepIdx);
     } catch (err: unknown) {
       const e = err as { response?: { data?: { error?: string } } };
       toast.error(e.response?.data?.error || "Failed to prepare transaction");
@@ -513,16 +564,17 @@ export function BridgeWidget() {
               {quoteLoading ? <><Loader2 className="w-4 h-4 animate-spin"/> Finding best route…</> : "Get Quote →"}
             </button>
           ) : (
-            <button onClick={execute} disabled={executing || timeLeft === 0 || !recipientOk}
+            <button onClick={execute} disabled={executing || waitingForNext || timeLeft === 0 || !recipientOk}
               className="w-full py-4 rounded-xl font-display font-black text-sm tracking-widest uppercase transition-all flex items-center justify-center gap-2"
               style={{
-                background: !executing && timeLeft > 0 ? "var(--g50)" : "var(--g700)",
-                color: !executing && timeLeft > 0 ? "var(--g900)" : "var(--g500)",
-                cursor: !executing && timeLeft > 0 ? "pointer" : "not-allowed",
+                background: !executing && !waitingForNext && timeLeft > 0 ? "var(--g50)" : "var(--g700)",
+                color: !executing && !waitingForNext && timeLeft > 0 ? "var(--g900)" : "var(--g500)",
+                cursor: !executing && !waitingForNext && timeLeft > 0 ? "pointer" : "not-allowed",
               }}>
-              {executing ? <><Loader2 className="w-4 h-4 animate-spin"/> Waiting for signature…</>
+              {executing ? <><Loader2 className="w-4 h-4 animate-spin"/> Preparing…</>
+                : waitingForNext ? <><Loader2 className="w-4 h-4 animate-spin"/> Waiting for confirmations…</>
                 : timeLeft === 0 ? "Quote expired — get a new one"
-                : "Sign & Send →"}
+                : "Start Transfer →"}
             </button>
           )}
 
