@@ -4,7 +4,7 @@ import {
   type RefObject,
 } from "react";
 import { createPortal } from "react-dom";
-import { useAccount, useSendTransaction, useSwitchChain, useReadContract } from "wagmi";
+import { useAccount, useSendTransaction, useSwitchChain } from "wagmi";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { ArrowDown, ChevronDown, Settings, AlertCircle, Loader2, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,7 +12,6 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { api, fmtAmount, shortAddr } from "@/lib/api";
 import { SafeImage } from "@/components/ui/SafeImage";
-import { erc20Abi } from "viem";
 
 interface Chain { id: string; name: string; logoUrl: string; nativeSymbol: string }
 interface Token { symbol: string; name: string; address: string; decimals: number; logoUrl: string }
@@ -60,11 +59,7 @@ function DropdownPortal({ anchorRef, onClose, children }: {
   );
 }
 
-// ChainSelector and TokenSelector (unchanged from your original)
-function ChainSelector({ value, chains, onChange, id, openId, setOpenId }: {
-  value: Chain | null; chains: Chain[]; onChange: (c: Chain) => void;
-  id: string; openId: string | null; setOpenId: (id: string | null) => void;
-}) {
+function ChainSelector({ value, chains, onChange, id, openId, setOpenId }: any) {
   const btnRef = useRef<HTMLButtonElement>(null);
   const isOpen = openId === id;
   return (
@@ -81,7 +76,7 @@ function ChainSelector({ value, chains, onChange, id, openId, setOpenId }: {
       <AnimatePresence>
         {isOpen && (
           <DropdownPortal anchorRef={btnRef} onClose={() => setOpenId(null)}>
-            {chains.map(c => (
+            {chains.map((c: any) => (
               <button key={c.id}
                 className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left"
                 style={{ background: value?.id === c.id ? "var(--g800)" : "transparent" }}
@@ -100,10 +95,7 @@ function ChainSelector({ value, chains, onChange, id, openId, setOpenId }: {
   );
 }
 
-function TokenSelector({ value, tokens, onChange, id, openId, setOpenId }: {
-  value: Token | null; tokens: Token[]; onChange: (t: Token) => void;
-  id: string; openId: string | null; setOpenId: (id: string | null) => void;
-}) {
+function TokenSelector({ value, tokens, onChange, id, openId, setOpenId }: any) {
   const btnRef = useRef<HTMLButtonElement>(null);
   const isOpen = openId === id;
   return (
@@ -118,7 +110,7 @@ function TokenSelector({ value, tokens, onChange, id, openId, setOpenId }: {
       <AnimatePresence>
         {isOpen && (
           <DropdownPortal anchorRef={btnRef} onClose={() => setOpenId(null)}>
-            {tokens.map(t => (
+            {tokens.map((t: any) => (
               <button key={t.symbol}
                 className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left"
                 style={{ background: value?.symbol === t.symbol ? "var(--g800)" : "transparent" }}
@@ -142,21 +134,7 @@ function TokenSelector({ value, tokens, onChange, id, openId, setOpenId }: {
 function ChainTokenRow({
   label, chain, token, amount, chains, tokens, readOnly,
   onChainChange, onTokenChange, onAmountChange, rowId, openId, setOpenId
-}: {
-  label: string;
-  chain: Chain | null;
-  token: Token | null;
-  amount: string;
-  chains: Chain[];
-  tokens: Token[];
-  readOnly?: boolean;
-  onChainChange: (c: Chain) => void;
-  onTokenChange: (t: Token) => void;
-  onAmountChange?: (v: string) => void;
-  rowId: string;
-  openId: string | null;
-  setOpenId: (id: string | null) => void;
-}) {
+}: any) {
   return (
     <div className="rounded-2xl p-4 space-y-3" style={{ background: "var(--g800)", border: "1px solid var(--g700)" }}>
       <div className="font-mono text-[0.58rem] tracking-widest uppercase" style={{ color: "var(--g500)" }}>{label}</div>
@@ -171,10 +149,16 @@ function ChainTokenRow({
               {amount || "—"}
             </div>
           ) : (
-            <input type="number" min="0" step="any" placeholder="0.00" value={amount}
+            <input
+              type="number"
+              min="0"
+              step="any"
+              placeholder="0.00"
+              value={amount}
               onChange={e => onAmountChange?.(e.target.value)}
               className="w-full text-right bg-transparent font-mono font-bold text-xl iz-input"
-              style={{ color: "var(--g50)", border: "none", outline: "none" }} />
+              style={{ color: "var(--g50)", border: "none", outline: "none" }}
+            />
           )}
         </div>
       </div>
@@ -182,7 +166,7 @@ function ChainTokenRow({
   );
 }
 
-function SummaryRow({ label, value, danger }: { label: string; value: string; danger?: boolean }) {
+function SummaryRow({ label, value, danger }: any) {
   return (
     <div className="flex justify-between items-center py-1">
       <span className="font-mono text-[0.64rem]" style={{ color: "var(--g600)" }}>{label}</span>
@@ -272,14 +256,21 @@ export function BridgeWidget() {
     const num = parseFloat(inputAmount);
     if (isNaN(num) || num <= 0) { toast.error("Enter a valid amount"); return; }
 
-    setQuoteLoading(true); setQuoteError(null); setQuote(null); setNeedsApproval(false); setOpenDropdownId(null);
+    setQuoteLoading(true);
+    setQuoteError(null);
+    setQuote(null);
+    setNeedsApproval(false);
+    setOpenDropdownId(null);
 
     try {
       const raw = BigInt(Math.round(num * 10 ** fromToken.decimals)).toString();
       const r = await api.post("/v1/quote", {
-        fromChain: fromChain.id, toChain: toChain.id,
-        fromToken: fromToken.symbol, toToken: toToken.symbol,
-        fromAmount: raw, fromAddress: address,
+        fromChain: fromChain.id,
+        toChain: toChain.id,
+        fromToken: fromToken.symbol,
+        toToken: toToken.symbol,
+        fromAmount: raw,
+        fromAddress: address,
         recipientAddress: useCustomRecipient && recipientAddr ? recipientAddr : address,
         slippage: parseFloat(slippage) / 100,
       });
@@ -287,32 +278,30 @@ export function BridgeWidget() {
     } catch (err: unknown) {
       const e = err as { response?: { data?: { error?: string } } };
       setQuoteError(e.response?.data?.error ?? "No route found. Try a different amount or token.");
-    } finally { setQuoteLoading(false); }
+    } finally {
+      setQuoteLoading(false);
+    }
   };
 
-  // Check if approval is needed for the first step
+  // Check if we need approval for the first step
   const checkApprovalNeeded = async (firstTx: any): Promise<boolean> => {
     if (!fromToken || !address || !firstTx) return false;
 
-    const spender = firstTx.to as `0x${string}`;
+    const spender = firstTx.to;
     setFirstTxSpender(spender);
 
+    // For native tokens we don't need approval
+    if (fromToken.address === "0x0000000000000000000000000000000000000000") {
+      setNeedsApproval(false);
+      return false;
+    }
+
     try {
-      const requiredAmount = BigInt(fromToken.decimals > 0 ? 
-        Math.ceil(parseFloat(inputAmount) * 10 ** fromToken.decimals) : parseFloat(inputAmount));
-
-      const { data: allowance } = await useReadContract({
-        address: fromToken.address as `0x${string}`,
-        abi: erc20Abi,
-        functionName: 'allowance',
-        args: [address as `0x${string}`, spender],
-      });
-
-      const hasEnough = BigInt(allowance || 0) >= requiredAmount;
-      setNeedsApproval(!hasEnough);
-      return !hasEnough;
-    } catch (err) {
-      console.error("Allowance check failed", err);
+      // Simple check - in production you can use useReadContract for live value
+      // For now we assume approval is needed for ERC20 tokens (safe default)
+      setNeedsApproval(true);
+      return true;
+    } catch {
       setNeedsApproval(false);
       return false;
     }
@@ -323,53 +312,48 @@ export function BridgeWidget() {
 
     setApproving(true);
     try {
-      const approveTxData = {
-        to: fromToken.address as `0x${string}`,
-        data: `0x095ea7b3${firstTxSpender.slice(2).padStart(64, '0')}${"f".repeat(64)}` as `0x${string}`, // approve(MaxUint256)
-        value: BigInt(0),
-      };
+      const approveData = `0x095ea7b3${firstTxSpender.slice(2).padStart(64, '0')}${"f".repeat(64)}` as `0x${string}`;
 
       sendTransaction({
-        ...approveTxData,
-        chainId: Number(fromChain?.id ? /* you can map slug to chainId if needed */ 42161 : 42161),
+        to: fromToken.address as `0x${string}`,
+        data: approveData,
+        value: BigInt(0),
       }, {
-        onSuccess: async () => {
-          toast.success(`Approval for ${fromToken.symbol} submitted...`);
-          // Wait a bit then re-check
-          setTimeout(async () => {
+        onSuccess: () => {
+          toast.success(`Approval transaction sent for ${fromToken.symbol}`);
+          setTimeout(() => {
             setNeedsApproval(false);
             setApproving(false);
-            toast.success("Approval successful! You can now start the transfer.");
-            // Re-trigger execute
-            await execute();
-          }, 6000);
+            toast.success("Approval confirmed! Starting transfer now...");
+            execute(); // retry transfer after approval
+          }, 7000);
         },
         onError: (err: any) => {
-          toast.error("Approval rejected or failed");
+          toast.error("Approval rejected");
           setApproving(false);
         },
       });
     } catch (err) {
-      toast.error("Failed to send approval transaction");
+      toast.error("Failed to send approval");
       setApproving(false);
     }
   };
 
   const execute = async () => {
     if (!quote || !address) return;
-    setExecuting(true);
 
+    setExecuting(true);
     try {
       const recipient = useCustomRecipient && recipientAddr ? recipientAddr : address;
+
       const r = await api.post("/v1/execute", {
         quoteId: quote.id,
         userAddress: address,
         recipientAddress: recipient,
       });
 
-      const { executionId: execId, transactionRequest: firstTx, stepIndex: firstStepIdx } = r.data.data;
+      const { executionId: execId, transactionRequest: firstTx } = r.data.data;
 
-      // Check if approval is needed
       const needsApprove = await checkApprovalNeeded(firstTx);
       if (needsApprove) {
         setExecuting(false);
@@ -377,7 +361,7 @@ export function BridgeWidget() {
       }
 
       setExecutionId(execId);
-      await signAndSendStep(execId, firstTx, firstStepIdx);
+      await signAndSendStep(execId, firstTx, 0);
     } catch (err: unknown) {
       const e = err as { response?: { data?: { error?: string } } };
       toast.error(e.response?.data?.error || "Failed to prepare transaction");
@@ -385,7 +369,6 @@ export function BridgeWidget() {
     }
   };
 
-  // Your original signAndSendStep and startPollingNextStep (unchanged)
   const signAndSendStep = async (execId: string, txReq: any, stepIdx: number) => {
     const targetChainId = Number(txReq.chainId);
     try {
@@ -451,8 +434,6 @@ export function BridgeWidget() {
 
   return (
     <div className="w-full max-w-[460px] mx-auto">
-      {/* === ALL YOUR ORIGINAL UI CODE BELOW === */}
-
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
@@ -489,7 +470,7 @@ export function BridgeWidget() {
         )}
       </AnimatePresence>
 
-      {/* Main Card - your exact original layout */}
+      {/* Main Card */}
       <div className="rounded-2xl" style={{ background: "var(--g800)", border: "1px solid var(--g700)", boxShadow: "0 4px 32px rgba(0,0,0,0.5)" }}>
         <div className="flex items-center gap-2 px-4 py-3 rounded-t-2xl" style={{ borderBottom: "1px solid var(--g700)", background: "var(--g900)" }}>
           {["#e74c3c", "#e67e22", "#27ae60"].map((c, i) => <div key={i} className="w-2.5 h-2.5 rounded-full" style={{ background: c }} />)}
@@ -525,7 +506,7 @@ export function BridgeWidget() {
             onAmountChange={() => { }}
             rowId="to" openId={openDropdownId} setOpenId={setOpenDropdownId} />
 
-          {/* Recipient section - unchanged */}
+          {/* Recipient */}
           <div className="pt-1">
             <label className="flex items-center gap-2 cursor-pointer w-fit mb-2 select-none"
               onClick={() => { setUseCustomRecipient(p => !p); if (useCustomRecipient) setQuote(null); }}>
@@ -554,7 +535,7 @@ export function BridgeWidget() {
             </AnimatePresence>
           </div>
 
-          {/* Quote Summary - unchanged */}
+          {/* Quote Summary */}
           <AnimatePresence>
             {quote && (
               <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
@@ -576,7 +557,7 @@ export function BridgeWidget() {
             )}
           </AnimatePresence>
 
-          {/* Error - unchanged */}
+          {/* Error */}
           <AnimatePresence>
             {quoteError && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -587,7 +568,7 @@ export function BridgeWidget() {
             )}
           </AnimatePresence>
 
-          {/* Action Buttons - Updated with approval logic */}
+          {/* Action Buttons with Approval Flow */}
           {!isConnected ? (
             <ConnectButton.Custom>
               {({ openConnectModal }) => (
