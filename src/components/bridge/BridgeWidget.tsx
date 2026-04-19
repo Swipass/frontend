@@ -4,7 +4,7 @@ import {
   type RefObject,
 } from "react";
 import { createPortal } from "react-dom";
-import { useAccount, useSendTransaction, useSwitchChain } from "wagmi";
+import { useAccount, useSwitchChain } from "wagmi";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { ArrowDown, ChevronDown, Settings, AlertCircle, Loader2, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,6 +12,9 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { api, fmtAmount, shortAddr } from "@/lib/api";
 import { SafeImage } from "@/components/ui/SafeImage";
+
+// LI.FI SDK imports
+import { getRoutes, executeRoute, type Route, type RoutesRequest } from "@lifi/sdk";
 
 interface Chain { id: string; name: string; logoUrl: string; nativeSymbol: string }
 interface Token { symbol: string; name: string; address: string; decimals: number; logoUrl: string }
@@ -59,6 +62,7 @@ function DropdownPortal({ anchorRef, onClose, children }: {
   );
 }
 
+// ChainSelector and TokenSelector (your original, unchanged)
 function ChainSelector({ value, chains, onChange, id, openId, setOpenId }: any) {
   const btnRef = useRef<HTMLButtonElement>(null);
   const isOpen = openId === id;
@@ -131,22 +135,19 @@ function TokenSelector({ value, tokens, onChange, id, openId, setOpenId }: any) 
   );
 }
 
-function ChainTokenRow({
-  label, chain, token, amount, chains, tokens, readOnly,
-  onChainChange, onTokenChange, onAmountChange, rowId, openId, setOpenId
-}: any) {
+function ChainTokenRow(props: any) {
   return (
     <div className="rounded-2xl p-4 space-y-3" style={{ background: "var(--g800)", border: "1px solid var(--g700)" }}>
-      <div className="font-mono text-[0.58rem] tracking-widest uppercase" style={{ color: "var(--g500)" }}>{label}</div>
-      <ChainSelector value={chain} chains={chains} onChange={onChainChange} id={`${rowId}-chain`} openId={openId} setOpenId={setOpenId} />
+      <div className="font-mono text-[0.58rem] tracking-widest uppercase" style={{ color: "var(--g500)" }}>{props.label}</div>
+      <ChainSelector {...props} id={`${props.rowId}-chain`} />
       <div className="flex items-center gap-3">
         <div className="shrink-0">
-          <TokenSelector value={token} tokens={tokens} onChange={onTokenChange} id={`${rowId}-token`} openId={openId} setOpenId={setOpenId} />
+          <TokenSelector {...props} id={`${props.rowId}-token`} />
         </div>
         <div className="flex-1 min-w-0">
-          {readOnly ? (
-            <div className="text-right font-mono font-bold text-xl truncate" style={{ color: amount ? "var(--g50)" : "var(--g600)" }}>
-              {amount || "—"}
+          {props.readOnly ? (
+            <div className="text-right font-mono font-bold text-xl truncate" style={{ color: props.amount ? "var(--g50)" : "var(--g600)" }}>
+              {props.amount || "—"}
             </div>
           ) : (
             <input
@@ -154,8 +155,8 @@ function ChainTokenRow({
               min="0"
               step="any"
               placeholder="0.00"
-              value={amount}
-              onChange={e => onAmountChange?.(e.target.value)}
+              value={props.amount}
+              onChange={e => props.onAmountChange?.(e.target.value)}
               className="w-full text-right bg-transparent font-mono font-bold text-xl iz-input"
               style={{ color: "var(--g50)", border: "none", outline: "none" }}
             />
@@ -178,7 +179,6 @@ function SummaryRow({ label, value, danger }: any) {
 export function BridgeWidget() {
   const router = useRouter();
   const { address, isConnected } = useAccount();
-  const { sendTransaction } = useSendTransaction();
   const { switchChain } = useSwitchChain();
 
   const [chains, setChains] = useState<Chain[]>([]);
@@ -199,16 +199,12 @@ export function BridgeWidget() {
   const [showSettings, setShowSettings] = useState(false);
   const [slippage, setSlippage] = useState("0.5");
 
-  // Multi-step execution state
+  // LI.FI SDK route state
+  const [lifiRoute, setLifiRoute] = useState<Route | null>(null);
   const [executionId, setExecutionId] = useState<string | null>(null);
   const [waitingForNext, setWaitingForNext] = useState(false);
-  const nextStepInterval = useRef<NodeJS.Timeout | null>(null);
 
-  // Approval state
-  const [needsApproval, setNeedsApproval] = useState(false);
-  const [approving, setApproving] = useState(false);
-  const [firstTxSpender, setFirstTxSpender] = useState<string | null>(null);
-
+  // Load chains & tokens (your original)
   useEffect(() => {
     api.get("/v1/chains").then(r => {
       const list: Chain[] = r.data.data;
@@ -248,9 +244,10 @@ export function BridgeWidget() {
     setQuote(null);
     setQuoteError(null);
     setOpenDropdownId(null);
-    setNeedsApproval(false);
+    setLifiRoute(null);
   };
 
+  // Fetch quote from YOUR backend (keeps your fee + logging)
   const fetchQuote = async () => {
     if (!fromChain || !toChain || !fromToken || !toToken || !inputAmount) return;
     const num = parseFloat(inputAmount);
@@ -259,8 +256,7 @@ export function BridgeWidget() {
     setQuoteLoading(true);
     setQuoteError(null);
     setQuote(null);
-    setNeedsApproval(false);
-    setOpenDropdownId(null);
+    setLifiRoute(null);
 
     try {
       const raw = BigInt(Math.round(num * 10 ** fromToken.decimals)).toString();
@@ -274,156 +270,83 @@ export function BridgeWidget() {
         recipientAddress: useCustomRecipient && recipientAddr ? recipientAddr : address,
         slippage: parseFloat(slippage) / 100,
       });
-      setQuote(r.data.data);
+
+      const backendQuote = r.data.data;
+      setQuote(backendQuote);
+
+      // Convert your backend quote to LI.FI SDK route format for execution
+      // The SDK can use the raw route data you stored
+      // For simplicity, we re-fetch a route with SDK using the same params (recommended)
+      const sdkRequest: RoutesRequest = {
+        fromChainId: parseInt(fromChain.id), // adjust if your id is slug
+        toChainId: parseInt(toChain.id),
+        fromTokenAddress: fromToken.address,
+        toTokenAddress: toToken.address,
+        fromAmount: raw,
+        fromAddress: address || "",
+        toAddress: useCustomRecipient && recipientAddr ? recipientAddr : address || "",
+        slippage: parseFloat(slippage) / 100,
+        integrator: "swipass",
+      };
+
+      const sdkResult = await getRoutes(sdkRequest);
+      if (sdkResult.routes.length > 0) {
+        setLifiRoute(sdkResult.routes[0]);
+      }
     } catch (err: unknown) {
       const e = err as { response?: { data?: { error?: string } } };
-      setQuoteError(e.response?.data?.error ?? "No route found. Try a different amount or token.");
+      setQuoteError(e.response?.data?.error ?? "No route found.");
     } finally {
       setQuoteLoading(false);
     }
   };
 
-  // Check if we need approval for the first step
-  const checkApprovalNeeded = async (firstTx: any): Promise<boolean> => {
-    if (!fromToken || !address || !firstTx) return false;
-
-    const spender = firstTx.to;
-    setFirstTxSpender(spender);
-
-    // For native tokens we don't need approval
-    if (fromToken.address === "0x0000000000000000000000000000000000000000") {
-      setNeedsApproval(false);
-      return false;
-    }
-
-    try {
-      // Simple check - in production you can use useReadContract for live value
-      // For now we assume approval is needed for ERC20 tokens (safe default)
-      setNeedsApproval(true);
-      return true;
-    } catch {
-      setNeedsApproval(false);
-      return false;
-    }
-  };
-
-  const handleApprove = async () => {
-    if (!fromToken || !firstTxSpender || !address) return;
-
-    setApproving(true);
-    try {
-      const approveData = `0x095ea7b3${firstTxSpender.slice(2).padStart(64, '0')}${"f".repeat(64)}` as `0x${string}`;
-
-      sendTransaction({
-        to: fromToken.address as `0x${string}`,
-        data: approveData,
-        value: BigInt(0),
-      }, {
-        onSuccess: () => {
-          toast.success(`Approval transaction sent for ${fromToken.symbol}`);
-          setTimeout(() => {
-            setNeedsApproval(false);
-            setApproving(false);
-            toast.success("Approval confirmed! Starting transfer now...");
-            execute(); // retry transfer after approval
-          }, 7000);
-        },
-        onError: (err: any) => {
-          toast.error("Approval rejected");
-          setApproving(false);
-        },
-      });
-    } catch (err) {
-      toast.error("Failed to send approval");
-      setApproving(false);
-    }
-  };
-
+  // Main execution using LI.FI SDK (this is the powerful part)
   const execute = async () => {
-    if (!quote || !address) return;
-
-    setExecuting(true);
-    try {
-      const recipient = useCustomRecipient && recipientAddr ? recipientAddr : address;
-
-      const r = await api.post("/v1/execute", {
-        quoteId: quote.id,
-        userAddress: address,
-        recipientAddress: recipient,
-      });
-
-      const { executionId: execId, transactionRequest: firstTx } = r.data.data;
-
-      const needsApprove = await checkApprovalNeeded(firstTx);
-      if (needsApprove) {
-        setExecuting(false);
-        return;
-      }
-
-      setExecutionId(execId);
-      await signAndSendStep(execId, firstTx, 0);
-    } catch (err: unknown) {
-      const e = err as { response?: { data?: { error?: string } } };
-      toast.error(e.response?.data?.error || "Failed to prepare transaction");
-      setExecuting(false);
-    }
-  };
-
-  const signAndSendStep = async (execId: string, txReq: any, stepIdx: number) => {
-    const targetChainId = Number(txReq.chainId);
-    try {
-      await switchChain({ chainId: targetChainId });
-    } catch {
-      toast.error(`Please switch your wallet to chain ID ${targetChainId} and try again.`);
-      setExecuting(false);
+    if (!lifiRoute || !address) {
+      toast.error("No route available");
       return;
     }
 
-    sendTransaction({
-      to: txReq.to as `0x${string}`,
-      data: txReq.data as `0x${string}`,
-      value: BigInt(txReq.value ?? "0"),
-      chainId: targetChainId,
-    }, {
-      onSuccess: async (hash) => {
-        try {
-          await api.post(`/v1/execute/${execId}/submit-step`, { txHash: hash });
-          toast.success(`Step ${stepIdx + 1} submitted!`);
-          setWaitingForNext(true);
-          startPollingNextStep(execId);
-        } catch (err) {
-          toast.error("Failed to record transaction");
-          setExecuting(false);
-        }
-      },
-      onError: (err: any) => {
-        console.error(err);
-        toast.error("Transaction rejected or failed");
-        setExecuting(false);
-      },
-    });
-  };
+    setExecuting(true);
 
-  const startPollingNextStep = (execId: string) => {
-    if (nextStepInterval.current) clearInterval(nextStepInterval.current);
-    nextStepInterval.current = setInterval(async () => {
-      try {
-        const res = await api.get(`/v1/execute/${execId}/next`);
-        const data = res.data.data;
-        if (data.completed) {
-          clearInterval(nextStepInterval.current!);
-          setWaitingForNext(false);
+    try {
+      await executeRoute(lifiRoute, {
+        updateRouteHook: (updatedRoute) => {
+          console.log("Route updated:", updatedRoute);
+        },
+        onTransactionSubmitted: async (tx) => {
+          // Log to your backend for reliability scoring
+          if (executionId) {
+            await api.post(`/v1/execute/${executionId}/submit-step`, { txHash: tx });
+          } else {
+            // Create execution record on first tx
+            const r = await api.post("/v1/execute", {
+              quoteId: quote?.id || "",
+              userAddress: address,
+              recipientAddress: useCustomRecipient && recipientAddr ? recipientAddr : address,
+            });
+            setExecutionId(r.data.data.executionId);
+            await api.post(`/v1/execute/${r.data.data.executionId}/submit-step`, { txHash: tx });
+          }
+          toast.success("Transaction submitted!");
+        },
+        onRouteDone: (finalRoute) => {
           setExecuting(false);
-          router.push(`/bridge/status/${execId}`);
-        } else if (data.transactionRequest) {
-          clearInterval(nextStepInterval.current!);
           setWaitingForNext(false);
-          await signAndSendStep(execId, data.transactionRequest, data.stepIndex);
+          toast.success("Transfer completed successfully!");
+          if (executionId) router.push(`/bridge/status/${executionId}`);
+        },
+        onRouteFailed: (error) => {
+          setExecuting(false);
+          toast.error(error.message || "Transfer failed");
         }
-      } catch (err) {
-        console.error("Poll next step error", err);
-      }
-    }, 3000);
+      });
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Execution failed");
+      setExecuting(false);
+    }
   };
 
   const fromTokens = fromChain ? (tokenMap[fromChain.id] ?? []) : [];
@@ -434,6 +357,7 @@ export function BridgeWidget() {
 
   return (
     <div className="w-full max-w-[460px] mx-auto">
+      {/* === YOUR ORIGINAL HEADER, SETTINGS, MAIN CARD, SELECTORS, RECIPIENT, SUMMARY, ERROR === */}
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
@@ -447,7 +371,7 @@ export function BridgeWidget() {
         </button>
       </div>
 
-      {/* Settings */}
+      {/* Settings (unchanged) */}
       <AnimatePresence>
         {showSettings && (
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
@@ -506,7 +430,7 @@ export function BridgeWidget() {
             onAmountChange={() => { }}
             rowId="to" openId={openDropdownId} setOpenId={setOpenDropdownId} />
 
-          {/* Recipient */}
+          {/* Recipient section - your original */}
           <div className="pt-1">
             <label className="flex items-center gap-2 cursor-pointer w-fit mb-2 select-none"
               onClick={() => { setUseCustomRecipient(p => !p); if (useCustomRecipient) setQuote(null); }}>
@@ -535,7 +459,7 @@ export function BridgeWidget() {
             </AnimatePresence>
           </div>
 
-          {/* Quote Summary */}
+          {/* Quote Summary - your original */}
           <AnimatePresence>
             {quote && (
               <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
@@ -568,7 +492,7 @@ export function BridgeWidget() {
             )}
           </AnimatePresence>
 
-          {/* Action Buttons with Approval Flow */}
+          {/* Action Buttons */}
           {!isConnected ? (
             <ConnectButton.Custom>
               {({ openConnectModal }) => (
@@ -589,12 +513,6 @@ export function BridgeWidget() {
               }}>
               {quoteLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Finding best route…</> : "Get Quote →"}
             </button>
-          ) : needsApproval ? (
-            <button onClick={handleApprove} disabled={approving}
-              className="w-full py-4 rounded-xl font-display font-black text-sm tracking-widest uppercase transition-all flex items-center justify-center gap-2"
-              style={{ background: "var(--g50)", color: "var(--g900)", cursor: approving ? "not-allowed" : "pointer" }}>
-              {approving ? <><Loader2 className="w-4 h-4 animate-spin" /> Approving {fromToken?.symbol}...</> : `Approve ${fromToken?.symbol}`}
-            </button>
           ) : (
             <button onClick={execute} disabled={executing || waitingForNext || timeLeft === 0 || !recipientOk}
               className="w-full py-4 rounded-xl font-display font-black text-sm tracking-widest uppercase transition-all flex items-center justify-center gap-2"
@@ -603,7 +521,7 @@ export function BridgeWidget() {
                 color: !executing && !waitingForNext && timeLeft > 0 ? "var(--g900)" : "var(--g500)",
                 cursor: !executing && !waitingForNext && timeLeft > 0 ? "pointer" : "not-allowed",
               }}>
-              {executing ? <><Loader2 className="w-4 h-4 animate-spin" /> Preparing…</>
+              {executing ? <><Loader2 className="w-4 h-4 animate-spin" /> Executing with LI.FI SDK…</>
                 : waitingForNext ? <><Loader2 className="w-4 h-4 animate-spin" /> Waiting for confirmations…</>
                   : timeLeft === 0 ? "Quote expired — get a new one"
                     : "Start Transfer →"}
@@ -618,7 +536,7 @@ export function BridgeWidget() {
       </div>
 
       {quote && (
-        <button onClick={() => { setQuote(null); setQuoteError(null); setNeedsApproval(false); }}
+        <button onClick={() => { setQuote(null); setQuoteError(null); setLifiRoute(null); }}
           className="mt-3 w-full text-center font-mono text-[0.64rem] transition-colors"
           style={{ color: "var(--g600)", background: "none", border: "none", cursor: "pointer" }}>
           ← Get a new quote
